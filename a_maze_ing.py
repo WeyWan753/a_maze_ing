@@ -9,12 +9,14 @@ class Maze:
         self.width = width
         self.start = start
         self.end = end
-        (r, c) = (self.height/2 - 1, self.width/2 - 1)
-        self._42 = [(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
-                    (r, c - 1), (r - 1, c - 1), (r - 2, c - 1), (r + 1, c - 1),
-                    (r + 2, c - 1), (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
-                    (r - 1, c + 3), (r, c + 2), (r + 1, c + 1), (r + 2, c + 1),
-                    (r + 2, c + 2), (r + 2, c + 3)]
+        self._42 = []
+        if self.height >= 6 and self.width >= 9:
+            (r, c) = (self.height//2, self.width//2)
+            self._42 = [(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
+                        (r, c - 1), (r - 1, c - 1), (r - 2, c - 1), (r + 1, c - 1),
+                        (r + 2, c - 1), (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
+                        (r - 1, c + 3), (r, c + 2), (r + 1, c + 1), (r + 2, c + 1),
+                        (r + 2, c + 2), (r + 2, c + 3)]
         self.maze = [
             [
                 {"N": True, "E": True, "S": True, "W": True}
@@ -324,11 +326,11 @@ class Maze_Solver:
 
 def main() -> None:
     #seed = 10
-    for seed in random.sample(range(1, 101), 10):
+    for seed in random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(10, 10, (0, 0), (3, 6))
+        maze = Maze(3, 5, (0, 0), (0, 3))
         maze.render_maze([])
-        maze_gen = Maze_Generator(maze, perfect=False)
+        maze_gen = Maze_Generator(maze, perfect=True)
         maze_gen.generate_maze()
         maze_sol = Maze_Solver(maze)
         maze_sol.solver()
