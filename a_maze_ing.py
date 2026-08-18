@@ -145,6 +145,8 @@ class Maze_Generator:
         self.stack.append(start)
         self.visited.append(start)
         while self.stack:
+            self.render_maze()
+            time.sleep(0.05)
             r, c = self.stack[-1]
             neighbour = []
             if r > 0 and (r - 1, c) not in self.visited:
@@ -186,43 +188,71 @@ class Maze_Generator:
         for r in range(self.maze_object.height):
             row_str = "|"
             for c in range(self.maze_object.width):
-                if (r, c) == self.maze_object.start and self.maze_object.maze[r][c]["E"]:
-                    row_str += " S |"
-                elif (r, c) == self.maze_object.start and not self.maze_object.maze[r][c]["E"]:
-                    row_str += " S  "
-                elif (r, c) == self.maze_object.end and self.maze_object.maze[r][c]["E"]:
-                    row_str += " E |"
-                elif (r, c) == self.maze_object.end and not self.maze_object.maze[r][c]["E"]:
-                    row_str += " E  "
-                elif (r, c) in self.stack:
+                if (r, c) in self.stack:
                     index = self.stack.index((r, c))
-                    if self.maze_object.maze[r][c]["E"]:
-                        row_str += " . |"
-                    elif index + 1 < len(self.stack) and self.stack[index + 1] == (r, c + 1):
-                        row_str += " . ."
-                    elif index - 1 >= 0 and self.stack[index - 1] == (r, c + 1):
-                        row_str += " . ."
+                    if (r, c) == self.maze_object.start:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " S |"
+                        elif index + 1 < len(self.stack) and self.stack[index + 1] == (r, c + 1):
+                            row_str += " S ."
+                        elif index - 1 >= 0 and self.stack[index - 1] == (r, c + 1):
+                            row_str += " S ."
+                        else:
+                            row_str += " S  "
+                    elif (r, c) == self.maze_object.end:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " E |"
+                        elif index + 1 < len(self.stack) and self.stack[index + 1] == (r, c + 1):
+                            row_str += " E ."
+                        elif index - 1 >= 0 and self.stack[index - 1] == (r, c + 1):
+                            row_str += " E ."
+                        else:
+                            row_str += " E  "
                     else:
-                        row_str += " .  "
-                elif self.maze_object.maze[r][c]["E"]:
-                    row_str += "   |"
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " . |"
+                        elif index + 1 < len(self.stack) and self.stack[index + 1] == (r, c + 1):
+                            row_str += " . ."
+                        elif index - 1 >= 0 and self.stack[index - 1] == (r, c + 1):
+                            row_str += " . ."
+                        else:
+                            row_str += " .  "
                 else:
-                    row_str += "    "
+                    if (r, c) == self.maze_object.start:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " S |"
+                        else:
+                            row_str += " S  "
+                    elif (r, c) == self.maze_object.end:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " E |"
+                        else:
+                            row_str += " E  "
+                    else:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += "   |"
+                        else:
+                            row_str += "    "
             whole_maze += row_str + "\n"
             row_str = "+"
             for c in range(self.maze_object.width):
-                if self.maze_object.maze[r][c]["S"]:
-                    row_str += "---+"
-                elif (r, c) in self.stack:
+                if (r, c) in self.stack:
                     index = self.stack.index((r, c))
-                    if index + 1 < len(self.stack) and self.stack[index + 1] == (r + 1, c):
+                    if self.maze_object.maze[r][c]["S"]:
+                        row_str += "---+"
+                    elif index + 1 < len(self.stack) and self.stack[index + 1] == (r + 1, c):
                         row_str += " . +"
                     elif index - 1 >= 0 and self.stack[index - 1] == (r + 1, c):
                         row_str += " . +"
                     else:
                         row_str += "   +"
                 else:
-                    row_str += "   +"
+                    if self.maze_object.maze[r][c]["S"]:
+                        row_str += "---+"
+                    else:
+                        row_str += "   +"
+
+                    
             whole_maze += row_str + "\n"
         print(whole_maze)
 
@@ -278,50 +308,78 @@ class Maze_Solver:
         for r in range(self.maze_object.height):
             row_str = "|"
             for c in range(self.maze_object.width):
-                if (r, c) == self.maze_object.start and self.maze_object.maze[r][c]["E"]:
-                    row_str += " S |"
-                elif (r, c) == self.maze_object.start and not self.maze_object.maze[r][c]["E"]:
-                    row_str += " S  "
-                elif (r, c) == self.maze_object.end and self.maze_object.maze[r][c]["E"]:
-                    row_str += " E |"
-                elif (r, c) == self.maze_object.end and not self.maze_object.maze[r][c]["E"]:
-                    row_str += " E  "
-                elif (r, c) in stack:
+                if (r, c) in stack:
                     index = stack.index((r, c))
-                    if self.maze_object.maze[r][c]["E"]:
-                        row_str += " . |"
-                    elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
-                        row_str += " . ."
-                    elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
-                        row_str += " . ."
+                    if (r, c) == self.maze_object.start:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " S |"
+                        elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
+                            row_str += " S ."
+                        elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
+                            row_str += " S ."
+                        else:
+                            row_str += " S  "
+                    elif (r, c) == self.maze_object.end:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " E |"
+                        elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
+                            row_str += " E ."
+                        elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
+                            row_str += " E ."
+                        else:
+                            row_str += " E  "
                     else:
-                        row_str += " .  "
-                elif self.maze_object.maze[r][c]["E"]:
-                    row_str += "   |"
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " . |"
+                        elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
+                            row_str += " . ."
+                        elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
+                            row_str += " . ."
+                        else:
+                            row_str += " .  "
                 else:
-                    row_str += "    "
+                    if (r, c) == self.maze_object.start:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " S |"
+                        else:
+                            row_str += " S  "
+                    elif (r, c) == self.maze_object.end:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += " E |"
+                        else:
+                            row_str += " E  "
+                    else:
+                        if self.maze_object.maze[r][c]["E"]:
+                            row_str += "   |"
+                        else:
+                            row_str += "    "
             whole_maze += row_str + "\n"
             row_str = "+"
             for c in range(self.maze_object.width):
-                if self.maze_object.maze[r][c]["S"]:
-                    row_str += "---+"
-                elif (r, c) in stack:
+                if (r, c) in stack:
                     index = stack.index((r, c))
-                    if index + 1 < len(stack) and stack[index + 1] == (r + 1, c):
+                    if self.maze_object.maze[r][c]["S"]:
+                        row_str += "---+"
+                    elif index + 1 < len(stack) and stack[index + 1] == (r + 1, c):
                         row_str += " . +"
                     elif index - 1 >= 0 and stack[index - 1] == (r + 1, c):
                         row_str += " . +"
                     else:
                         row_str += "   +"
                 else:
-                    row_str += "   +"
+                    if self.maze_object.maze[r][c]["S"]:
+                        row_str += "---+"
+                    else:
+                        row_str += "   +"
+
+                    
             whole_maze += row_str + "\n"
         print(whole_maze)
         print(solution_direction)
 
 
 def main() -> None:
-    seed = 67
+    seed = 1048
     random.seed(seed)
     maze = Maze(10, 10, (0, 0), (3, 6))
     maze.render_maze()
