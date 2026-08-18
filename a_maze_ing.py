@@ -70,12 +70,14 @@ class Maze:
 
 
     def render_maze(self, stack) -> None:
+        R, G, B = 255, 255, 0
+        print(f"\033[38;2;{R};{G};{B}m", end="")
         whole_maze = "+" + "---+" * self.width + "\n"
         for r in range(self.height):
             row_str = "|"
             for c in range(self.width):
                 if (r, c) in self._42:
-                    row_str += "███|"
+                    row_str += f"\033[38;2;0;255;0m███\033[38;2;{R};{G};{B}m|"
                 elif (r, c) in stack:
                     index = stack.index((r, c))
                     if (r, c) == self.start:
@@ -143,7 +145,7 @@ class Maze:
                     
             whole_maze += row_str + "\n"
         print(whole_maze)
-
+        print("\033[0m", end="")
 
 
 class Maze_Generator:
@@ -328,7 +330,7 @@ def main() -> None:
     #seed = 10
     for seed in random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(3, 5, (0, 0), (0, 3))
+        maze = Maze(10, 10, (0, 0), (0, 3))
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=True)
         maze_gen.generate_maze()
