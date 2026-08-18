@@ -9,6 +9,12 @@ class Maze:
         self.width = width
         self.start = start
         self.end = end
+        (r, c) = (self.height/2 - 1, self.width/2 - 1)
+        self._42 = [(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
+                    (r, c - 1), (r - 1, c - 1), (r - 2, c - 1), (r + 1, c - 1),
+                    (r + 2, c - 1), (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
+                    (r - 1, c + 3), (r, c + 2), (r + 1, c + 1), (r + 2, c + 1),
+                    (r + 2, c + 2), (r + 2, c + 3)]
         self.maze = [
             [
                 {"N": True, "E": True, "S": True, "W": True}
@@ -66,7 +72,9 @@ class Maze:
         for r in range(self.height):
             row_str = "|"
             for c in range(self.width):
-                if (r, c) in stack:
+                if (r, c) in self._42:
+                    row_str += "███|"
+                elif (r, c) in stack:
                     index = stack.index((r, c))
                     if (r, c) == self.start:
                         if self.maze[r][c]["E"]:
@@ -140,7 +148,7 @@ class Maze_Generator:
     def __init__(self, maze: Maze, perfect = True) -> None:
         self.maze_object = maze
         self.stack = []
-        self.visited = []
+        self.visited = [] + maze._42
         self.perfect = perfect
 
     def valid_wall_removal(self, r: int, c: int, direction: str) -> bool:
@@ -150,12 +158,15 @@ class Maze_Generator:
                 return False
             if not maze.maze[r][c]["N"]:
                 return False
-
+            if (r - 1, c) in self.maze_object._42:
+                return False
     
         if direction == "E":
             if c == maze.width - 1:
                 return False
             if not maze.maze[r][c]["E"]:
+                return False
+            if (r, c + 1) in self.maze_object._42:
                 return False
 
         if direction == "S":
@@ -163,12 +174,17 @@ class Maze_Generator:
                 return False
             if not maze.maze[r][c]["S"]:
                 return False
+            if (r + 1, c) in self.maze_object._42:
+                return False
 
         if direction == "W":
             if c == 0:
                 return False
             if not maze.maze[r][c]["W"]:
                 return False
+            if (r, c - 1) in self.maze_object._42:
+                return False
+
         return True
 
 
@@ -178,7 +194,7 @@ class Maze_Generator:
         dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if maze.cell_to_int(r, c) != (1 << 4) - 1 and
                      (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1] 
         i = 0
-        while dead_ends:
+        while i < len(dead_ends):
             r, c = dead_ends[i]
             neighbour = []
             if self.valid_wall_removal(r, c, "N"):
@@ -204,12 +220,12 @@ class Maze_Generator:
                 else:
                     maze.maze[r][c]["E"] = False
                     maze.maze[r][c + 1]["W"] = False
+                
                 dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if maze.cell_to_int(r, c) != (1 << 4) - 1 and
-                                (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1] 
+                            (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1] 
                 i = 0
             else:
                 i += 1
-            
 
 
     def generate_maze(self) -> None:
