@@ -40,8 +40,7 @@ class Maze:
     def maze_to_hex(self) -> str:
         return "\n".join(["".join(["0123456789abcdef"[self.cell_to_int(r, c)] for c in range(self.width)]) for r in range(self.height)])
     
-    def render_maze(self, stack) -> str:
-        R, G, B = 0, 150, 225
+    def render_maze(self, stack, R=0, G=150,B=225) -> str:
 
         WALL      = f"\033[38;2;{R};{G};{B}m"   
         GREEN     = "\033[38;2;0;255;0m"        
@@ -201,14 +200,14 @@ class Maze_Generator:
                 i += 1
 
 
-    def generate_maze(self) -> None:
+    def generate_maze(self, R=0, G=150,B=225) -> None:
         maze = self.maze_object
         start = maze.start
         end = maze.end
         self.stack.append(start)
         self.visited.add(start)
         while self.stack:
-            frame = maze.render_maze(self.stack)
+            frame = maze.render_maze(self.stack, R, G, B)
             os.system("cls" if os.name == "nt" else "clear")
             print(frame)
             time.sleep(0.005)
@@ -277,20 +276,44 @@ class Maze_Solver:
 
 
 def main() -> None:
-    try:
-        print("\033[?25l", end="") #hide cursor
-        random.seed(42)
-        maze = Maze(15, 15, (0, 0), (14, 14))
-        maze_gen = Maze_Generator(maze, perfect=False)
-        maze_gen.generate_maze()
-        maze_sol = Maze_Solver(maze)
-        frame = maze.render_maze([item[0] for item in maze_sol.solution_path])
-        os.system("cls" if os.name == "nt" else "clear")
-        print(frame)
-        time.sleep(0.005)
-        input("options or sum?")
-    finally:
-        print("\033[?25h", end="")#show cursor
+    random.seed(42)
+    show_path = True
+    perfect = False
+    i = 0
+    colours = [(0, 150, 225), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)]
+    while True:
+        try:
+            print("\033[?25l", end="") #hide cursor
+            maze = Maze(15, 15, (0, 0), (14, 14))
+            maze_gen = Maze_Generator(maze, perfect)
+            maze_gen.generate_maze(*colours[i])
+            maze_sol = Maze_Solver(maze)
+            maze_sol.solver()
+            while True:
+                path = [item[0] for item in maze_sol.solution_path] if show_path else []
+                frame = maze.render_maze(path, *colours[i])
+                os.system("cls" if os.name == "nt" else "clear")
+                print(frame)
+                time.sleep(0.005)
+                print("=== A-Maze_ing ===")
+                print("1. Re-generate a new maze")
+                print("2. Show / Hide the shortest path")
+                print("3. Rotate the wall colours")
+                print("4. Quit")
+                choice = input("Choice? (1-4): ")
+                if choice == "1":
+                    break
+                if choice == "2":
+                    show_path = not show_path
+                    continue
+                if choice == "3":
+                    i += 1
+                    i %= len(colours)
+                    continue
+                if choice == "4":
+                    return
+        finally:
+            print("\033[?25h", end="")#show cursor
 
 if __name__ == "__main__":
     main()
