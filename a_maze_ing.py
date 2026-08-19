@@ -282,9 +282,9 @@ def main() -> None:
     WIDTH = 20
     HEIGHT = 20
     ENTRY = (0, 0)
-    EXIT = (19, 19)
+    EXIT = (20//2, 20//2)
     OUTPUT_FILE = "maze.txt"
-    PERFECT = True
+    PERFECT = False
     DELAY = 0
     SEED = 42
 
@@ -314,8 +314,9 @@ def main() -> None:
                 print("3. Rotate the wall colours")
                 print(f"4. Toggle animation of generation of the maze (Status : {'On' if display_generation else 'Off'})")
                 print("5. Quit")
-                #print("".join([item[1] for item in maze_sol.solution_path if item[1] is not None]))
-                #print(maze.maze_to_hex())
+                with open(OUTPUT_FILE, "w") as file:
+                    file.write(maze.maze_to_hex() + "\n\n" + f"{ENTRY[0]},{ENTRY[1]}" + "\n" + f"{EXIT[0]},{EXIT[1]}" + "\n" +
+                               "".join([item[1] for item in maze_sol.solution_path if item[1] is not None]) + "\n")
                 choice = input("Choice? (1-5): ")
                 if choice == "1":
                     break
