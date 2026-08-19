@@ -137,15 +137,62 @@ class Maze_Generator:
                 return False
             if not maze.maze[r][c]["N"]:
                 return False
-            if (r - 1, c) in self.maze_object._42:
+            if (r - 1, c) in maze._42:
                 return False
+            if (maze.cell_to_int(r, c) == (1 << 0)
+                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
+                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
+                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
+                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
+                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
+                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
+                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
+                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+                return False
+            (r2, c2) = (r - 1, c)
+            if (maze.cell_to_int(r2, c2) == (1 << 2)
+                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
+                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
+                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
+                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
+                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
+                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
+                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
+                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
+                return False
+
     
         if direction == "E":
             if c == maze.width - 1:
                 return False
             if not maze.maze[r][c]["E"]:
                 return False
-            if (r, c + 1) in self.maze_object._42:
+            if (r, c + 1) in maze._42:
+                return False
+            if (maze.cell_to_int(r, c) == (1 << 1)
+                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
+                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
+                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
+                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
+                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
+                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
+                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
+                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+                return False
+            (r2, c2) = (r, c + 1)
+            if (maze.cell_to_int(r2, c2) == (1 << 3)
+                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
+                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
+                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
+                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
+                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
+                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
+                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
+                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
                 return False
 
         if direction == "S":
@@ -153,7 +200,30 @@ class Maze_Generator:
                 return False
             if not maze.maze[r][c]["S"]:
                 return False
-            if (r + 1, c) in self.maze_object._42:
+            if (r + 1, c) in maze._42:
+                return False
+            if (maze.cell_to_int(r, c) == (1 << 2)
+                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
+                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
+                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
+                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
+                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
+                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
+                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
+                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+                return False
+            (r2, c2) = (r + 1, c)
+            if (maze.cell_to_int(r2, c2) == (1 << 0)
+                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
+                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
+                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
+                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
+                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
+                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
+                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
+                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
                 return False
 
         if direction == "W":
@@ -161,7 +231,30 @@ class Maze_Generator:
                 return False
             if not maze.maze[r][c]["W"]:
                 return False
-            if (r, c - 1) in self.maze_object._42:
+            if (r, c - 1) in maze._42:
+                return False
+            if (maze.cell_to_int(r, c) == (1 << 3)
+                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
+                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
+                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
+                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
+                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
+                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
+                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
+                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+                return False
+            (r2, c2) = (r, c - 1)
+            if (maze.cell_to_int(r2, c2) == (1 << 1)
+                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
+                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
+                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
+                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
+                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
+                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
+                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
+                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
+                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
                 return False
 
         return True
@@ -214,8 +307,8 @@ class Maze_Generator:
         self.stack.append(start)
         self.visited.append(start)
         while self.stack:
-            #maze.render_maze(self.stack)
-            #time.sleep(0.05)
+            maze.render_maze(self.stack)
+            time.sleep(0.05)
             r, c = self.stack[-1]
             neighbour = []
             if r > 0 and (r - 1, c) not in self.visited:
@@ -305,7 +398,7 @@ def main() -> None:
     #seed = 10
     for seed in random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(30, 30, (29, 29), (0, 0))
+        maze = Maze(13, 13, (0, 0), (12, 12))
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=False)
         maze_gen.generate_maze()
