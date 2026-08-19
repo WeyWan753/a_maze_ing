@@ -45,7 +45,7 @@ class Maze:
 
 
     def render_maze(self, stack) -> None:
-        R, G, B = 20, 145, 220
+        R, G, B = 0, 150, 225
         print(f"\033[38;2;{R};{G};{B}m", end="")
         whole_maze = "+" + "---+" * self.width + "\n"
         for r in range(self.height):
@@ -305,13 +305,16 @@ def main() -> None:
     #seed = 10
     for seed in random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(40, 40, (0, 0), (39, 39))
+        maze = Maze(30, 30, (29, 29), (0, 0))
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=False)
         maze_gen.generate_maze()
         maze_sol = Maze_Solver(maze)
         maze_sol.solver()
         maze.render_maze([item[0] for item in maze_sol.solution_path])
+        print(maze.maze_to_hex())
+        sol = [item[1] for item in maze_sol.solution_path if item[1] is not None]
+        print("".join(sol))
         print("-" * 90)
 
 if __name__ == "__main__":
