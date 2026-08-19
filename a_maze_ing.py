@@ -330,7 +330,7 @@ def main() -> None:
     #seed = 10
     for seed in random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(6, 9, (0, 0), (5, 8))
+        maze = Maze(6, 8, (0, 0), (5, 8))
         maze.end = maze.height//2, maze.width//2
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=False)
