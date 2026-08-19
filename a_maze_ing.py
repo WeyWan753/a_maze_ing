@@ -40,62 +40,64 @@ class Maze:
     def maze_to_hex(self) -> str:
         return "\n".join(["".join(["0123456789abcdef"[self.cell_to_int(r, c)] for c in range(self.width)]) for r in range(self.height)])
     
-
-
-
-    def render_maze(self, stack) -> None:
+    def render_maze(self, stack) -> str:
         R, G, B = 0, 150, 225
-    
-        print(f"\033[38;2;{R};{G};{B}m", end="")
+
+        WALL      = f"\033[38;2;{R};{G};{B}m"   
+        GREEN     = "\033[38;2;0;255;0m"        
+        YELLOW    = "\033[38;2;255;255;0m"      
+        RESET     = "\033[0m"
+
+        print(WALL, end="")
         whole_maze = "+" + "---+" * self.width + "\n"
         for r in range(self.height):
             row_str = "|"
             for c in range(self.width):
                 if (r, c) in self._42:
-                    row_str += f"\033[38;2;0;255;0m███\033[38;2;{R};{G};{B}m|"
+                    row_str += f"{GREEN}███{WALL}|"
                 elif (r, c) in stack:
                     index = stack.index((r, c))
                     if (r, c) == self.start:
                         if self.maze[r][c]["E"]:
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m|"
+                            row_str += f"{GREEN} S {WALL}|"
                         elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"{GREEN} S {YELLOW}."
                         elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"{GREEN} S {YELLOW}."
                         else:
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m "
+                            row_str += f"{GREEN} S  "
                     elif (r, c) == self.end:
                         if self.maze[r][c]["E"]:
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m|"
+                            row_str += f"{GREEN} E {WALL}|"
                         elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"{GREEN} E {YELLOW}."
                         elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"{GREEN} E {YELLOW}."
                         else:
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m "
+                            row_str += f"{GREEN} E  "
                     else:
                         if self.maze[r][c]["E"]:
-                            row_str += f" \033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m |"
+                            row_str += f" {YELLOW}.{WALL} |"
                         elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
-                            row_str += f"\033[38;2;255;255;0m . .\033[38;2;{R};{G};{B}m"
+                            row_str += f"{YELLOW} . ."
                         elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
-                            row_str += f"\033[38;2;255;255;0m . .\033[38;2;{R};{G};{B}m"
+                            row_str += f"{YELLOW} . ."
                         else:
-                            row_str += f"\033[38;2;255;255;0m .  \033[38;2;{R};{G};{B}m"
+                            row_str += f"{YELLOW} .  "
                 else:
                     if (r, c) == self.start:
                         if self.maze[r][c]["E"]:
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m|"
+                            row_str += f"{GREEN} S {WALL}|"
                         else:
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m "
+                            row_str += f"{GREEN} S  "
                     elif (r, c) == self.end:
                         if self.maze[r][c]["E"]:
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m|"
+                            row_str += f"{GREEN} E {WALL}|"
                         else:
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m "
+                            row_str += f"{GREEN} E  "
                     else:
                         if self.maze[r][c]["E"]:
-                            row_str += "   |"
+                            row_str += f"{WALL}   |"
                         else:
                             row_str += "    "
             whole_maze += row_str + "\n"
@@ -104,24 +106,20 @@ class Maze:
                 if (r, c) in stack:
                     index = stack.index((r, c))
                     if self.maze[r][c]["S"]:
-                        row_str += "---+"
+                        row_str += f"{WALL}---+"
                     elif index + 1 < len(stack) and stack[index + 1] == (r + 1, c):
-                        row_str += f" \033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m +"
+                        row_str += f" {YELLOW}.{WALL} +"
                     elif index - 1 >= 0 and stack[index - 1] == (r + 1, c):
-                        row_str += f" \033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m +"
+                        row_str += f" {YELLOW}.{WALL} +"
                     else:
-                        row_str += "   +"
+                        row_str += f"{WALL}   +"
                 else:
                     if self.maze[r][c]["S"]:
-                        row_str += "---+"
+                        row_str += f"{WALL}---+"
                     else:
-                        row_str += "   +"
-
-                    
+                        row_str += f"{WALL}   +"
             whole_maze += row_str + "\n"
-        print(whole_maze)
-        print("\033[0m", end="")
-
+        return (whole_maze + RESET)
 
 class Maze_Generator:
     def __init__(self, maze: Maze, perfect = True) -> None:
@@ -182,6 +180,10 @@ class Maze_Generator:
         dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if is_dead_end(r, c)] 
         i = 0
         while i < len(dead_ends):
+            frame = maze.render_maze([])
+            os.system("cls" if os.name == "nt" else "clear")
+            print(frame)
+            time.sleep(0.03)
             r, c = dead_ends[i]
             neighbour_dir = []
             for direction in DIRECTIONS:
@@ -206,8 +208,10 @@ class Maze_Generator:
         self.stack.append(start)
         self.visited.add(start)
         while self.stack:
-            #maze.render_maze(self.stack)
-            #time.sleep(0.05)
+            frame = maze.render_maze(self.stack)
+            os.system("cls" if os.name == "nt" else "clear")
+            print(frame)
+            time.sleep(0.005)
             r, c = self.stack[-1]
             neighbour = []
             for direction in DIRECTIONS:
@@ -229,11 +233,9 @@ class Maze_Generator:
             else:
                 self.stack.pop(-1)
 
-        maze.render_maze([])
 
         if not self.perfect:
             self.make_imperfect()
-            maze.render_maze([])
 
 
 class Maze_Solver:
@@ -245,6 +247,7 @@ class Maze_Solver:
         self.queue_index = 0
         self.found_solution = False
         self.solution_path = []
+
 
     def solver(self) -> None:
         self.queue.append(self.maze_object.start)
@@ -274,19 +277,20 @@ class Maze_Solver:
 
 
 def main() -> None:
-    for seed in [130]:#random.sample(range(1, 101), 1):
-        random.seed(seed)
-        maze = Maze(30, 30, (0, 0), (29, 15))
-        maze.render_maze([])
+    try:
+        print("\033[?25l", end="") #hide cursor
+        random.seed(42)
+        maze = Maze(15, 15, (0, 0), (14, 14))
         maze_gen = Maze_Generator(maze, perfect=False)
         maze_gen.generate_maze()
         maze_sol = Maze_Solver(maze)
-        maze_sol.solver()
-        maze.render_maze([item[0] for item in maze_sol.solution_path])
-        print(maze.maze_to_hex())
-        sol = [item[1] for item in maze_sol.solution_path if item[1] is not None]
-        print("".join(sol))
-        print("-" * 90)
+        frame = maze.render_maze([item[0] for item in maze_sol.solution_path])
+        os.system("cls" if os.name == "nt" else "clear")
+        print(frame)
+        time.sleep(0.005)
+        input("options or sum?")
+    finally:
+        print("\033[?25h", end="")#show cursor
 
 if __name__ == "__main__":
     main()
