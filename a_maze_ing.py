@@ -59,29 +59,29 @@ class Maze:
                         if self.maze[r][c]["E"]:
                             row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m|"
                         elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m\033[38;2;0;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
                         elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m\033[38;2;0;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
                         else:
                             row_str += f"\033[38;2;0;255;0m S \033[38;2;{R};{G};{B}m "
                     elif (r, c) == self.end:
                         if self.maze[r][c]["E"]:
                             row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m|"
                         elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m\033[38;2;0;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
                         elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m\033[38;2;0;255;0m.\033[38;2;{R};{G};{B}m"
+                            row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m\033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m"
                         else:
                             row_str += f"\033[38;2;0;255;0m E \033[38;2;{R};{G};{B}m "
                     else:
                         if self.maze[r][c]["E"]:
-                            row_str += f" \033[38;2;0;255;0m.\033[38;2;{R};{G};{B}m |"
+                            row_str += f" \033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m |"
                         elif index + 1 < len(stack) and stack[index + 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m . .\033[38;2;{R};{G};{B}m"
+                            row_str += f"\033[38;2;255;255;0m . .\033[38;2;{R};{G};{B}m"
                         elif index - 1 >= 0 and stack[index - 1] == (r, c + 1):
-                            row_str += f"\033[38;2;0;255;0m . .\033[38;2;{R};{G};{B}m"
+                            row_str += f"\033[38;2;255;255;0m . .\033[38;2;{R};{G};{B}m"
                         else:
-                            row_str += f"\033[38;2;0;255;0m .  \033[38;2;{R};{G};{B}m"
+                            row_str += f"\033[38;2;255;255;0m .  \033[38;2;{R};{G};{B}m"
                 else:
                     if (r, c) == self.start:
                         if self.maze[r][c]["E"]:
@@ -106,9 +106,9 @@ class Maze:
                     if self.maze[r][c]["S"]:
                         row_str += "---+"
                     elif index + 1 < len(stack) and stack[index + 1] == (r + 1, c):
-                        row_str += " . +"
+                        row_str += f" \033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m +"
                     elif index - 1 >= 0 and stack[index - 1] == (r + 1, c):
-                        row_str += " . +"
+                        row_str += f" \033[38;2;255;255;0m.\033[38;2;{R};{G};{B}m +"
                     else:
                         row_str += "   +"
                 else:
@@ -305,8 +305,7 @@ def main() -> None:
     #seed = 10
     for seed in random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(20, 20, (0, 0), (5, 8))
-        maze.end = maze.height//2, maze.width//2
+        maze = Maze(40, 40, (0, 0), (39, 39))
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=False)
         maze_gen.generate_maze()
