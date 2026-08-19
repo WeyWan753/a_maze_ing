@@ -276,24 +276,54 @@ class Maze_Solver:
             self.solution_path.reverse()
 
 
+def load_config(filename="config.txt"):
+    config = {}
+
+    with open(filename, "r") as file:
+        for line in file:
+            line = line.strip()
+
+            if not line or line.startswith("#"):
+                continue
+
+            key, value = line.split("=", 1)
+            config[key] = value
+
+    return config
+
 
 def main() -> None:
-    
-    WIDTH = 20
-    HEIGHT = 20
-    ENTRY = (0, 0)
-    EXIT = (20//2, 20//2)
-    OUTPUT_FILE = "maze.txt"
-    PERFECT = False
-    DELAY = 0
-    SEED = 42
 
     display_generation = False
-    random.seed(SEED)
     show_path = True
     i = 0
     colours = [(0, 150, 225), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)]
-
+    
+    try:
+        config = load_config("config.txt")   
+        WIDTH = int(config["WIDTH"])
+        HEIGHT = int(config["HEIGHT"])
+        ENTRY = tuple(int(x) for x in config["ENTRY"].split(","))
+        EXIT = tuple(int(x) for x in config["EXIT"].split(","))
+        OUTPUT_FILE = config["OUTPUT_FILE"].strip("\"'")
+        PERFECT = True if config["PERFECT"].strip("\"'").lower() == "true" else False
+        DELAY = float(config["DELAY"])
+        SEED = int(config["SEED"])
+        random.seed(SEED)
+        maze = Maze(HEIGHT, WIDTH, ENTRY, EXIT)
+        if ENTRY in maze._42:
+            raise Exception("Entry Cant be in 42 pattern")
+        if EXIT in maze._42:
+            raise Exception("Exit Cant be in 42 pattern")
+        if ENTRY == EXIT:
+            raise Exception("Entry and Exit cant be the same")
+        if not (0 <= ENTRY[0] < maze.height and 0 <= ENTRY[1] < maze.width):
+            raise Exception("Entry is out of bound")
+        if not (0 <= EXIT[0] < maze.height and 0 <= EXIT[1] < maze.width):
+            raise Exception("Exit is out of bound")
+    except Exception as e:
+        print(e)
+        return
 
     while True:
         try:
@@ -314,9 +344,11 @@ def main() -> None:
                 print("3. Rotate the wall colours")
                 print(f"4. Toggle animation of generation of the maze (Status : {'On' if display_generation else 'Off'})")
                 print("5. Quit")
+
                 with open(OUTPUT_FILE, "w") as file:
                     file.write(maze.maze_to_hex() + "\n\n" + f"{ENTRY[0]},{ENTRY[1]}" + "\n" + f"{EXIT[0]},{EXIT[1]}" + "\n" +
                                "".join([item[1] for item in maze_sol.solution_path if item[1] is not None]) + "\n")
+
                 choice = input("Choice? (1-5): ")
                 if choice == "1":
                     break
@@ -331,6 +363,11 @@ def main() -> None:
                     display_generation = not display_generation
                 if choice == "5":
                     return
+
+        except Exception as e:
+            print(e)
+            return
+
         finally:
             print("\033[?25h", end="")#show cursor
 
