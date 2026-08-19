@@ -170,7 +170,7 @@ class Maze_Generator:
 
 
 
-    def make_imperfect(self) -> None:
+    def make_imperfect(self, R=0, G=150,B=225, delay=0.01, display_generation=False) -> None:
         maze = self.maze_object
 
         def is_dead_end(r, c) -> bool:
@@ -179,10 +179,11 @@ class Maze_Generator:
         dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if is_dead_end(r, c)] 
         i = 0
         while i < len(dead_ends):
-            frame = maze.render_maze([])
-            os.system("cls" if os.name == "nt" else "clear")
-            print(frame)
-            time.sleep(0.03)
+            if display_generation:
+                frame = maze.render_maze([], R, G, B)
+                os.system("cls" if os.name == "nt" else "clear")
+                print(frame)
+                time.sleep(delay)
             r, c = dead_ends[i]
             neighbour_dir = []
             for direction in DIRECTIONS:
@@ -200,17 +201,18 @@ class Maze_Generator:
                 i += 1
 
 
-    def generate_maze(self, R=0, G=150,B=225) -> None:
+    def generate_maze(self, R=0, G=150,B=225, delay=0.1, display_generation=False) -> None:
         maze = self.maze_object
         start = maze.start
         end = maze.end
         self.stack.append(start)
         self.visited.add(start)
         while self.stack:
-            frame = maze.render_maze(self.stack, R, G, B)
-            os.system("cls" if os.name == "nt" else "clear")
-            print(frame)
-            time.sleep(0.005)
+            if display_generation:
+                frame = maze.render_maze(self.stack, R, G, B)
+                os.system("cls" if os.name == "nt" else "clear")
+                print(frame)
+                time.sleep(delay)
             r, c = self.stack[-1]
             neighbour = []
             for direction in DIRECTIONS:
@@ -234,7 +236,7 @@ class Maze_Generator:
 
 
         if not self.perfect:
-            self.make_imperfect()
+            self.make_imperfect(R, G, B, delay, display_generation)
 
 
 class Maze_Solver:
@@ -277,24 +279,28 @@ class Maze_Solver:
 
 def main() -> None:
     
-    random.seed(42)
+    WIDTH = 20
+    HEIGHT = 20
+    ENTRY = (0, 0)
+    EXIT = (19, 19)
+    OUTPUT_FILE = "maze.txt"
+    PERFECT = True
+    DELAY = 0
+    SEED = 42
+
+    display_generation = False
+    random.seed(SEED)
     show_path = True
     i = 0
     colours = [(0, 150, 225), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)]
 
-    WIDTH = 15
-    HEIGHT = 15
-    ENTRY = (0, 0)
-    EXIT = (14, 14)
-    OUTPUT_FILE = "maze.txt"
-    PERFECT = False
 
     while True:
         try:
             print("\033[?25l", end="") #hide cursor
             maze = Maze(HEIGHT, WIDTH, ENTRY, EXIT)
-            maze_gen = Maze_Generator(maze, PERFECT)
-            maze_gen.generate_maze(*colours[i])
+            maze_gen = Maze_Generator(maze, perfect = PERFECT)
+            maze_gen.generate_maze(*colours[i], delay = DELAY, display_generation=display_generation)
             maze_sol = Maze_Solver(maze)
             maze_sol.solver()
             while True:
@@ -302,13 +308,15 @@ def main() -> None:
                 frame = maze.render_maze(path, *colours[i])
                 os.system("cls" if os.name == "nt" else "clear")
                 print(frame)
-                time.sleep(0.005)
                 print("=== A-Maze_ing ===")
                 print("1. Re-generate a new maze")
                 print("2. Show / Hide the shortest path")
                 print("3. Rotate the wall colours")
-                print("4. Quit")
-                choice = input("Choice? (1-4): ")
+                print(f"4. Toggle animation of generation of the maze (Status : {'On' if display_generation else 'Off'})")
+                print("5. Quit")
+                #print("".join([item[1] for item in maze_sol.solution_path if item[1] is not None]))
+                #print(maze.maze_to_hex())
+                choice = input("Choice? (1-5): ")
                 if choice == "1":
                     break
                 if choice == "2":
@@ -319,6 +327,8 @@ def main() -> None:
                     i %= len(colours)
                     continue
                 if choice == "4":
+                    display_generation = not display_generation
+                if choice == "5":
                     return
         finally:
             print("\033[?25h", end="")#show cursor
