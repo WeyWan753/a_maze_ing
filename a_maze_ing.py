@@ -13,10 +13,10 @@ class Maze:
         if self.height >= 6 and self.width >= 9:
             (r, c) = (self.height//2, self.width//2)
             self._42 = [(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
-                        (r, c - 1), (r - 1, c - 1), (r - 2, c - 1), (r + 1, c - 1),
-                        (r + 2, c - 1), (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
-                        (r - 1, c + 3), (r, c + 2), (r + 1, c + 1), (r + 2, c + 1),
-                        (r + 2, c + 2), (r + 2, c + 3)]
+                        (r, c - 1), (r + 1, c - 1), (r + 2, c - 1), 
+                        (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
+                        (r - 1, c + 3), (r, c + 3), (r, c + 2), (r, c + 1),
+                        (r + 1, c + 1), (r + 2, c + 1), (r + 2, c + 2), (r + 2, c + 3)]
         self.maze = [
             [
                 {"N": True, "E": True, "S": True, "W": True}
@@ -330,7 +330,7 @@ def main() -> None:
     #seed = 10
     for seed in random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(20, 20, (0, 0), (19, 19))
+        maze = Maze(6, 9, (0, 0), (5, 8))
         maze.end = maze.height//2, maze.width//2
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=False)
