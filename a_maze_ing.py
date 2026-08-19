@@ -321,6 +321,12 @@ def main() -> None:
             raise Exception("Entry is out of bound")
         if not (0 <= EXIT[0] < maze.height and 0 <= EXIT[1] < maze.width):
             raise Exception("Exit is out of bound")
+        if HEIGHT <= 0:
+            raise Exception("Height must be positive integer")
+        if WIDTH <= 0:
+            raise Exception("Width must be positive integer")
+        if (HEIGHT == 1 or WIDTH == 1) and PERFECT == False:
+            raise Exception("No non-perfect maze can be generated")
     except Exception as e:
         print(e)
         return
