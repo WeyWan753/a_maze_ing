@@ -20,11 +20,11 @@ class Maze:
         self._42 = []
         if self.height >= 6 and self.width >= 9:
             (r, c) = (self.height//2, self.width//2)
-            self._42 = [(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
+            self._42 = {(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
                         (r, c - 1), (r + 1, c - 1), (r + 2, c - 1), 
                         (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
                         (r - 1, c + 3), (r, c + 3), (r, c + 2), (r, c + 1),
-                        (r + 1, c + 1), (r + 2, c + 1), (r + 2, c + 2), (r + 2, c + 3)]
+                        (r + 1, c + 1), (r + 2, c + 1), (r + 2, c + 2), (r + 2, c + 3)}
         self.maze = [
             [
                 {"N": True, "E": True, "S": True, "W": True}
@@ -175,8 +175,11 @@ class Maze_Generator:
 
     def make_imperfect(self) -> None:
         maze = self.maze_object
-        dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if maze.cell_to_int(r, c) != (1 << 4) - 1 and
-                     (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1] 
+
+        def is_dead_end(r, c) -> bool:
+            return (maze.cell_to_int(r, c) != (1 << 4) - 1 and (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1)
+
+        dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if is_dead_end(r, c)] 
         i = 0
         while i < len(dead_ends):
             r, c = dead_ends[i]
@@ -190,9 +193,7 @@ class Maze_Generator:
                 opposite = DIRECTIONS[neighbour_dir]["opposite"]
                 maze.maze[r][c][neighbour_dir] = False
                 maze.maze[r + DIRECTIONS[neighbour_dir]["dr"]][c + DIRECTIONS[neighbour_dir]["dc"]][opposite] = False
-                
-                dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if maze.cell_to_int(r, c) != (1 << 4) - 1 and
-                            (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1] 
+                dead_ends = [(r, c) for (r, c) in dead_ends if is_dead_end(r, c)] 
                 i = 0
             else:
                 i += 1
