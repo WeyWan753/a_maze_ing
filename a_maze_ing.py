@@ -130,131 +130,69 @@ class Maze_Generator:
         self.visited = [] + maze._42
         self.perfect = perfect
 
+    def large_open_region_guard(self, r, c, direction) -> bool:
+        maze = self.maze_object
+        direction_bit = {"N": 0, "E": 1, "S": 2, "W": 3}[direction]
+        return (maze.cell_to_int(r, c) == (1 << direction_bit)
+            and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
+            and not any(maze.maze[r][c - 1][d] for d in "NES")
+            and not any(maze.maze[r + 1][c - 1][d] for d in "NE")
+            and not any(maze.maze[r + 1][c][d] for d in "WNE")
+            and not any(maze.maze[r + 1][c + 1][d] for d in "WN")
+            and not any(maze.maze[r][c + 1][d] for d in "SWN")
+            and not any(maze.maze[r - 1][c + 1][d] for d in "SW")
+            and not any(maze.maze[r - 1][c][d] for d in "ESW")
+            and not any(maze.maze[r - 1][c - 1][d] for d in "ES"))
+    
     def valid_wall_removal(self, r: int, c: int, direction: str) -> bool:
         maze = self.maze_object
+        opposite_direction = {"N": "S", "E": "W", "S": "N", "W": "E"}[direction]
         if direction == "N":
             if r == 0:
                 return False
-            if not maze.maze[r][c]["N"]:
+            if not maze.maze[r][c][direction]:
                 return False
             if (r - 1, c) in maze._42:
                 return False
-            if (maze.cell_to_int(r, c) == (1 << 0)
-                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
-                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
-                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
-                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
-                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
-                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
-                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
-                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r, c, direction):
                 return False
-            (r2, c2) = (r - 1, c)
-            if (maze.cell_to_int(r2, c2) == (1 << 2)
-                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
-                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
-                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
-                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
-                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
-                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
-                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
-                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r - 1, c, opposite_direction):
                 return False
-
     
         if direction == "E":
             if c == maze.width - 1:
                 return False
-            if not maze.maze[r][c]["E"]:
+            if not maze.maze[r][c][direction]:
                 return False
             if (r, c + 1) in maze._42:
                 return False
-            if (maze.cell_to_int(r, c) == (1 << 1)
-                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
-                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
-                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
-                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
-                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
-                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
-                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
-                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r, c, direction):
                 return False
-            (r2, c2) = (r, c + 1)
-            if (maze.cell_to_int(r2, c2) == (1 << 3)
-                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
-                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
-                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
-                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
-                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
-                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
-                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
-                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r, c + 1, opposite_direction):
                 return False
 
         if direction == "S":
             if r == maze.height - 1:
                 return False
-            if not maze.maze[r][c]["S"]:
+            if not maze.maze[r][c][direction]:
                 return False
             if (r + 1, c) in maze._42:
                 return False
-            if (maze.cell_to_int(r, c) == (1 << 2)
-                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
-                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
-                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
-                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
-                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
-                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
-                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
-                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r, c, direction):
                 return False
-            (r2, c2) = (r + 1, c)
-            if (maze.cell_to_int(r2, c2) == (1 << 0)
-                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
-                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
-                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
-                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
-                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
-                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
-                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
-                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r + 1, c, opposite_direction):
                 return False
 
         if direction == "W":
             if c == 0:
                 return False
-            if not maze.maze[r][c]["W"]:
+            if not maze.maze[r][c][direction]:
                 return False
             if (r, c - 1) in maze._42:
                 return False
-            if (maze.cell_to_int(r, c) == (1 << 3)
-                and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
-                and not any(maze.maze[r][c - 1][direction] for direction in "NES")
-                and not any(maze.maze[r + 1][c - 1][direction] for direction in "NE")
-                and not any(maze.maze[r + 1][c][direction] for direction in "WNE")
-                and not any(maze.maze[r + 1][c + 1][direction] for direction in "WN")
-                and not any(maze.maze[r][c + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r - 1][c + 1][direction] for direction in "SW")
-                and not any(maze.maze[r - 1][c][direction] for direction in "ESW")
-                and not any(maze.maze[r - 1][c - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r, c, direction):
                 return False
-            (r2, c2) = (r, c - 1)
-            if (maze.cell_to_int(r2, c2) == (1 << 1)
-                and c2 - 1 >= 0 and r2 - 1 >= 0 and c2 + 1 < maze.width and r2 + 1 < maze.height
-                and not any(maze.maze[r2][c2 - 1][direction] for direction in "NES")
-                and not any(maze.maze[r2 + 1][c2 - 1][direction] for direction in "NE")
-                and not any(maze.maze[r2 + 1][c2][direction] for direction in "WNE")
-                and not any(maze.maze[r2 + 1][c2 + 1][direction] for direction in "WN")
-                and not any(maze.maze[r2][c2 + 1][direction] for direction in "SWN")
-                and not any(maze.maze[r2 - 1][c2 + 1][direction] for direction in "SW")
-                and not any(maze.maze[r2 - 1][c2][direction] for direction in "ESW")
-                and not any(maze.maze[r2 - 1][c2 - 1][direction] for direction in "ES")):
+            if self.large_open_region_guard(r, c - 1, opposite_direction):
                 return False
 
         return True
@@ -307,8 +245,8 @@ class Maze_Generator:
         self.stack.append(start)
         self.visited.append(start)
         while self.stack:
-            maze.render_maze(self.stack)
-            time.sleep(0.05)
+            #maze.render_maze(self.stack)
+            #time.sleep(0.05)
             r, c = self.stack[-1]
             neighbour = []
             if r > 0 and (r - 1, c) not in self.visited:
@@ -395,8 +333,7 @@ class Maze_Solver:
 
 
 def main() -> None:
-    #seed = 10
-    for seed in random.sample(range(1, 101), 1):
+    for seed in [10]:#random.sample(range(1, 101), 1):
         random.seed(seed)
         maze = Maze(13, 13, (0, 0), (12, 12))
         maze.render_maze([])
