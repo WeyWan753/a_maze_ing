@@ -276,16 +276,24 @@ class Maze_Solver:
 
 
 def main() -> None:
+    
     random.seed(42)
     show_path = True
-    perfect = False
     i = 0
     colours = [(0, 150, 225), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)]
+
+    WIDTH = 15
+    HEIGHT = 15
+    ENTRY = (0, 0)
+    EXIT = (14, 14)
+    OUTPUT_FILE = "maze.txt"
+    PERFECT = False
+
     while True:
         try:
             print("\033[?25l", end="") #hide cursor
-            maze = Maze(15, 15, (0, 0), (14, 14))
-            maze_gen = Maze_Generator(maze, perfect)
+            maze = Maze(HEIGHT, WIDTH, ENTRY, EXIT)
+            maze_gen = Maze_Generator(maze, PERFECT)
             maze_gen.generate_maze(*colours[i])
             maze_sol = Maze_Solver(maze)
             maze_sol.solver()
