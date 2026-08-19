@@ -127,7 +127,7 @@ class Maze_Generator:
     def __init__(self, maze: Maze, perfect = True) -> None:
         self.maze_object = maze
         self.stack = []
-        self.visited = [] + maze._42
+        self.visited = set(maze._42)
         self.perfect = perfect
 
     def large_open_region(self, r, c, direction) -> bool:
@@ -187,11 +187,9 @@ class Maze_Generator:
 
             if neighbour_dir:
                 neighbour_dir = random.choice(neighbour_dir)
-                for direction in DIRECTIONS:
-                    opposite = DIRECTIONS[direction]["opposite"]
-                    if neighbour_dir == direction:
-                        maze.maze[r][c][direction] = False
-                        maze.maze[r + DIRECTIONS[direction]["dr"]][c + DIRECTIONS[direction]["dc"]][opposite] = False
+                opposite = DIRECTIONS[neighbour_dir]["opposite"]
+                maze.maze[r][c][neighbour_dir] = False
+                maze.maze[r + DIRECTIONS[neighbour_dir]["dr"]][c + DIRECTIONS[neighbour_dir]["dc"]][opposite] = False
                 
                 dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if maze.cell_to_int(r, c) != (1 << 4) - 1 and
                             (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1] 
@@ -205,7 +203,7 @@ class Maze_Generator:
         start = maze.start
         end = maze.end
         self.stack.append(start)
-        self.visited.append(start)
+        self.visited.add(start)
         while self.stack:
             #maze.render_maze(self.stack)
             #time.sleep(0.05)
@@ -223,13 +221,10 @@ class Maze_Generator:
             if neighbour:
                 next_point, neighbour_dir = random.choice(neighbour)
                 self.stack.append(next_point)
-                self.visited.append(next_point)
-                
-                for direction in DIRECTIONS:
-                    opposite = DIRECTIONS[direction]["opposite"]
-                    if neighbour_dir == direction:
-                        maze.maze[r][c][direction] = False
-                        maze.maze[r + DIRECTIONS[direction]["dr"]][c + DIRECTIONS[direction]["dc"]][opposite] = False
+                self.visited.add(next_point)
+                opposite = DIRECTIONS[neighbour_dir]["opposite"]
+                maze.maze[r][c][neighbour_dir] = False
+                maze.maze[r + DIRECTIONS[neighbour_dir]["dr"]][c + DIRECTIONS[neighbour_dir]["dc"]][opposite] = False
             else:
                 self.stack.pop(-1)
 
@@ -244,7 +239,7 @@ class Maze_Solver:
     def __init__(self, maze: Maze) -> None:
         self.maze_object = maze
         self.queue = []
-        self.visited = []
+        self.visited = set()
         self.parent = {}
         self.queue_index = 0
         self.found_solution = False
@@ -252,12 +247,11 @@ class Maze_Solver:
 
     def solver(self) -> None:
         self.queue.append(self.maze_object.start)
-        self.visited.append(self.maze_object.start)
+        self.visited.add(self.maze_object.start)
         self.parent[self.maze_object.start] = None
         while self.queue_index < len(self.queue):
             r, c = self.queue[self.queue_index]
-            #if (r, c) == self.maze_object.end:
-            if self.maze_object.end in self.queue:
+            if (r, c) == self.maze_object.end:
                 self.found_solution = True
                 break
             for direction in DIRECTIONS:
@@ -266,7 +260,7 @@ class Maze_Solver:
                     not in self.visited):
                     self.queue.append((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]))
                     self.parent[(r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"])] = ((r, c), direction)
-                    self.visited.append((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]))
+                    self.visited.add((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]))
             self.queue_index += 1
             
         if self.found_solution:
@@ -279,9 +273,9 @@ class Maze_Solver:
 
 
 def main() -> None:
-    for seed in [10]:#random.sample(range(1, 101), 1):
+    for seed in [130]:#random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(30, 30, (0, 0), (29, 29))
+        maze = Maze(30, 30, (0, 0), (29, 15))
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=False)
         maze_gen.generate_maze()
