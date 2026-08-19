@@ -3,6 +3,14 @@ import time
 import os
 
 
+DIRECTIONS = {
+    "N": {"dr": -1, "dc": 0, "opposite": "S", "bit": 0},
+    "E": {"dr": 0, "dc": 1, "opposite": "W", "bit": 1},
+    "S": {"dr": 1, "dc": 0, "opposite": "N", "bit": 2},
+    "W": {"dr": 0, "dc": -1, "opposite": "E", "bit": 3},
+}
+
+
 class Maze:
     def __init__(self, height: int, width: int, start: tuple[int, int], end: tuple[int, int]) -> None:
         self.height = height
@@ -27,16 +35,7 @@ class Maze:
 
 
     def cell_to_int(self, r: int, c: int) -> int:
-        result = 0
-        if self.maze[r][c]["N"]:
-            result += (1 << 0)
-        if self.maze[r][c]["E"]:
-            result += (1 << 1)
-        if self.maze[r][c]["S"]:
-            result += (1 << 2)
-        if self.maze[r][c]["W"]:
-            result += (1 << 3)
-        return result
+        return sum([1 << DIRECTIONS[direction]["bit"] for direction in DIRECTIONS if self.maze[r][c][direction]])
 
     def maze_to_hex(self) -> str:
         return "\n".join(["".join(["0123456789abcdef"[self.cell_to_int(r, c)] for c in range(self.width)]) for r in range(self.height)])
@@ -46,6 +45,7 @@ class Maze:
 
     def render_maze(self, stack) -> None:
         R, G, B = 0, 150, 225
+    
         print(f"\033[38;2;{R};{G};{B}m", end="")
         whole_maze = "+" + "---+" * self.width + "\n"
         for r in range(self.height):
@@ -130,70 +130,44 @@ class Maze_Generator:
         self.visited = [] + maze._42
         self.perfect = perfect
 
-    def large_open_region_guard(self, r, c, direction) -> bool:
+    def large_open_region(self, r, c, direction) -> bool:
         maze = self.maze_object
-        direction_bit = {"N": 0, "E": 1, "S": 2, "W": 3}[direction]
-        return (maze.cell_to_int(r, c) == (1 << direction_bit)
-            and c - 1 >= 0 and r - 1 >= 0 and c + 1 < maze.width and r + 1 < maze.height
-            and not any(maze.maze[r][c - 1][d] for d in "NES")
-            and not any(maze.maze[r + 1][c - 1][d] for d in "NE")
-            and not any(maze.maze[r + 1][c][d] for d in "WNE")
-            and not any(maze.maze[r + 1][c + 1][d] for d in "WN")
-            and not any(maze.maze[r][c + 1][d] for d in "SWN")
-            and not any(maze.maze[r - 1][c + 1][d] for d in "SW")
-            and not any(maze.maze[r - 1][c][d] for d in "ESW")
-            and not any(maze.maze[r - 1][c - 1][d] for d in "ES"))
+        if not(0 < c < maze.width - 1 and 0 < r < maze.height - 1):
+            return False
+        left = maze.maze[r][c - 1]
+        bottom_left = maze.maze[r + 1][c - 1]
+        bottom = maze.maze[r + 1][c]
+        bottom_right = maze.maze[r + 1][c + 1]
+        right = maze.maze[r][c + 1]
+        top_right = maze.maze[r - 1][c + 1]
+        top = maze.maze[r - 1][c]
+        top_left = maze.maze[r - 1][c - 1]
+        return (maze.cell_to_int(r, c) == (1 << DIRECTIONS[direction]["bit"])
+            and not any(left[d] for d in "NES")
+            and not any(bottom_left[d] for d in "NE")
+            and not any(bottom[d] for d in "WNE")
+            and not any(bottom_right[d] for d in "WN")
+            and not any(right[d] for d in "SWN")
+            and not any(top_right[d] for d in "SW")
+            and not any(top[d] for d in "ESW")
+            and not any(top_left[d] for d in "ES"))
     
     def valid_wall_removal(self, r: int, c: int, direction: str) -> bool:
         maze = self.maze_object
-        opposite_direction = {"N": "S", "E": "W", "S": "N", "W": "E"}[direction]
-        if direction == "N":
-            if r == 0:
-                return False
-            if not maze.maze[r][c][direction]:
-                return False
-            if (r - 1, c) in maze._42:
-                return False
-            if self.large_open_region_guard(r, c, direction):
-                return False
-            if self.large_open_region_guard(r - 1, c, opposite_direction):
-                return False
-    
-        if direction == "E":
-            if c == maze.width - 1:
-                return False
-            if not maze.maze[r][c][direction]:
-                return False
-            if (r, c + 1) in maze._42:
-                return False
-            if self.large_open_region_guard(r, c, direction):
-                return False
-            if self.large_open_region_guard(r, c + 1, opposite_direction):
-                return False
-
-        if direction == "S":
-            if r == maze.height - 1:
-                return False
-            if not maze.maze[r][c][direction]:
-                return False
-            if (r + 1, c) in maze._42:
-                return False
-            if self.large_open_region_guard(r, c, direction):
-                return False
-            if self.large_open_region_guard(r + 1, c, opposite_direction):
-                return False
-
-        if direction == "W":
-            if c == 0:
-                return False
-            if not maze.maze[r][c][direction]:
-                return False
-            if (r, c - 1) in maze._42:
-                return False
-            if self.large_open_region_guard(r, c, direction):
-                return False
-            if self.large_open_region_guard(r, c - 1, opposite_direction):
-                return False
+        if (not 0 <= r + DIRECTIONS[direction]["dr"] < maze.height
+            or not 0 <= c + DIRECTIONS[direction]["dc"] < maze.width):
+            return False
+        if not maze.maze[r][c][direction]:
+            return False
+        if (r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]) in maze._42:
+            return False
+        if self.large_open_region(r, c, direction):
+            return False
+        if self.large_open_region(
+                r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"],
+                DIRECTIONS[direction]["opposite"]):
+            return False
+        
 
         return True
 
@@ -206,30 +180,18 @@ class Maze_Generator:
         i = 0
         while i < len(dead_ends):
             r, c = dead_ends[i]
-            neighbour = []
-            if self.valid_wall_removal(r, c, "N"):
-                neighbour.append(((r - 1, c), "N"))
-            if self.valid_wall_removal(r, c, "E"):
-                neighbour.append(((r, c + 1), "E"))
-            if self.valid_wall_removal(r, c, "S"):
-                neighbour.append(((r + 1, c), "S"))
-            if self.valid_wall_removal(r, c, "W"):
-                neighbour.append(((r, c - 1), "W"))
+            neighbour_dir = []
+            for direction in DIRECTIONS:
+                if self.valid_wall_removal(r, c, direction):
+                    neighbour_dir.append(direction)
 
-            if neighbour:
-                next_point, wall_dir = random.choice(neighbour)
-                if wall_dir == "N":
-                    maze.maze[r][c]["N"] = False
-                    maze.maze[r - 1][c]["S"] = False
-                elif wall_dir == "S":
-                    maze.maze[r][c]["S"] = False
-                    maze.maze[r + 1][c]["N"] = False
-                elif wall_dir == "W":
-                    maze.maze[r][c]["W"] = False
-                    maze.maze[r][c - 1]["E"] = False
-                else:
-                    maze.maze[r][c]["E"] = False
-                    maze.maze[r][c + 1]["W"] = False
+            if neighbour_dir:
+                neighbour_dir = random.choice(neighbour_dir)
+                for direction in DIRECTIONS:
+                    opposite = DIRECTIONS[direction]["opposite"]
+                    if neighbour_dir == direction:
+                        maze.maze[r][c][direction] = False
+                        maze.maze[r + DIRECTIONS[direction]["dr"]][c + DIRECTIONS[direction]["dc"]][opposite] = False
                 
                 dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if maze.cell_to_int(r, c) != (1 << 4) - 1 and
                             (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1] 
@@ -249,33 +211,25 @@ class Maze_Generator:
             #time.sleep(0.05)
             r, c = self.stack[-1]
             neighbour = []
-            if r > 0 and (r - 1, c) not in self.visited:
-                neighbour.append(((r - 1, c), "N"))
-            if r < maze.height - 1 and (r + 1, c) not in self.visited:
-                neighbour.append(((r + 1, c), "S"))
-            if c > 0 and (r, c - 1) not in self.visited:
-                neighbour.append(((r, c - 1), "W"))
-            if c < maze.width - 1 and (r, c + 1) not in self.visited:
-                neighbour.append(((r, c + 1), "E"))
+            for direction in DIRECTIONS:
+                if (0 <= r + DIRECTIONS[direction]["dr"] < maze.height
+                    and 0 <= c + DIRECTIONS[direction]["dc"] < maze.width
+                    and (r + DIRECTIONS[direction]["dr"],
+                         c + DIRECTIONS[direction]["dc"]) not in self.visited):
+                    neighbour.append(
+                            ((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]), direction)
+                    )
 
             if neighbour:
-                next_point, direction = random.choice(neighbour)
+                next_point, neighbour_dir = random.choice(neighbour)
                 self.stack.append(next_point)
                 self.visited.append(next_point)
                 
-                if direction == "N":
-                    maze.maze[r][c]["N"] = False
-                    maze.maze[r - 1][c]["S"] = False
-                elif direction == "S":
-                    maze.maze[r][c]["S"] = False
-                    maze.maze[r + 1][c]["N"] = False
-                elif direction == "W":
-                    maze.maze[r][c]["W"] = False
-                    maze.maze[r][c - 1]["E"] = False
-                else:
-                    maze.maze[r][c]["E"] = False
-                    maze.maze[r][c + 1]["W"] = False
-
+                for direction in DIRECTIONS:
+                    opposite = DIRECTIONS[direction]["opposite"]
+                    if neighbour_dir == direction:
+                        maze.maze[r][c][direction] = False
+                        maze.maze[r + DIRECTIONS[direction]["dr"]][c + DIRECTIONS[direction]["dc"]][opposite] = False
             else:
                 self.stack.pop(-1)
 
@@ -302,25 +256,17 @@ class Maze_Solver:
         self.parent[self.maze_object.start] = None
         while self.queue_index < len(self.queue):
             r, c = self.queue[self.queue_index]
-            if (r, c) == self.maze_object.end:
+            #if (r, c) == self.maze_object.end:
+            if self.maze_object.end in self.queue:
                 self.found_solution = True
                 break
-            if not self.maze_object.maze[r][c]["N"] and (r - 1, c) not in self.visited:
-                self.queue.append((r - 1, c))
-                self.parent[(r - 1, c)] = ((r, c), "N")
-                self.visited.append((r - 1, c))
-            if not self.maze_object.maze[r][c]["S"] and (r + 1, c) not in self.visited:
-                self.queue.append((r + 1, c))
-                self.parent[(r + 1, c)] = ((r, c), "S")
-                self.visited.append((r + 1, c))
-            if not self.maze_object.maze[r][c]["W"] and (r, c - 1) not in self.visited:
-                self.queue.append((r, c - 1))
-                self.parent[(r, c - 1)] = ((r, c), "W")
-                self.visited.append((r, c - 1))
-            if not self.maze_object.maze[r][c]["E"] and (r, c + 1) not in self.visited:
-                self.queue.append((r, c + 1))
-                self.parent[(r, c + 1)] = ((r, c), "E")
-                self.visited.append((r, c + 1))
+            for direction in DIRECTIONS:
+                if (not self.maze_object.maze[r][c][direction] and
+                    (r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"])
+                    not in self.visited):
+                    self.queue.append((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]))
+                    self.parent[(r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"])] = ((r, c), direction)
+                    self.visited.append((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]))
             self.queue_index += 1
             
         if self.found_solution:
@@ -335,7 +281,7 @@ class Maze_Solver:
 def main() -> None:
     for seed in [10]:#random.sample(range(1, 101), 1):
         random.seed(seed)
-        maze = Maze(13, 13, (0, 0), (12, 12))
+        maze = Maze(30, 30, (0, 0), (29, 29))
         maze.render_maze([])
         maze_gen = Maze_Generator(maze, perfect=False)
         maze_gen.generate_maze()
