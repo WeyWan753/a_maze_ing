@@ -299,7 +299,7 @@ class MazeGenerator:
             self.make_imperfect(R, G, B, delay, display_generation)
 
 
-class Maze_Solver:
+class MazeSolver:
     def __init__(self, maze: Maze) -> None:
         self.maze_object = maze
         self.queue: list[tuple[int, int]] = []
@@ -461,7 +461,7 @@ def main() -> None:
             maze = Maze(config.HEIGHT, config.WIDTH, config.ENTRY, config.EXIT)
             maze_gen = MazeGenerator(maze, config.PERFECT)
             maze_gen.generate_maze(*colours[i], config.DELAY, disp_gen)
-            maze_sol = Maze_Solver(maze)
+            maze_sol = MazeSolver(maze)
             maze_sol.solver()
             while True:
                 path = [
