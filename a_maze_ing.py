@@ -39,9 +39,11 @@ class Maze:
         ]
 
     def cell_to_int(self, r: int, c: int) -> int:
-        return sum(
-            1 << int(DIRECTIONS[direction]["bit"])
-            for direction in DIRECTIONS if self.maze[r][c][direction]
+        return (
+            self.maze[r][c]["N"] * 1
+            + self.maze[r][c]["E"] * 2
+            + self.maze[r][c]["S"] * 4
+            + self.maze[r][c]["W"] * 8
         )
 
     def maze_to_hex(self) -> str:
@@ -69,6 +71,8 @@ class Maze:
         YELLOW = "\033[38;2;255;255;0m"
         RESET = "\033[0m"
 
+        stack_index = {cell: i for i, cell in enumerate(stack)}
+
         print(WALL, end="")
         whole_maze = "+" + "---+" * self.width + "\n"
         for r in range(self.height):
@@ -76,8 +80,8 @@ class Maze:
             for c in range(self.width):
                 if (r, c) in self._42:
                     row_str += f"{GREEN}███{WALL}|"
-                elif (r, c) in stack:
-                    index = stack.index((r, c))
+                elif (r, c) in stack_index:
+                    index = stack_index[(r, c)]
                     if (r, c) == self.start:
                         if self.maze[r][c]["E"]:
                             row_str += f"{GREEN} S {WALL}|"
@@ -128,8 +132,8 @@ class Maze:
             whole_maze += row_str + "\n"
             row_str = "+"
             for c in range(self.width):
-                if (r, c) in stack:
-                    index = stack.index((r, c))
+                if (r, c) in stack_index:
+                    index = stack_index[(r, c)]
                     if self.maze[r][c]["S"]:
                         row_str += f"{WALL}---+"
                     elif (index + 1 < len(stack) and
@@ -222,6 +226,9 @@ class Maze_Generator:
                 print(frame)
                 time.sleep(delay)
             r, c = dead_ends[i]
+            if not is_dead_end(r, c):
+                i += 1
+                continue
             neighbour_dirs = []
             for direction in DIRECTIONS:
                 if self.valid_wall_removal(r, c, direction):
@@ -238,11 +245,7 @@ class Maze_Generator:
                 ][
                         opposite
                 ] = False
-                dead_ends = [(r, c) for (r, c) in dead_ends
-                             if is_dead_end(r, c)]
-                i = 0
-            else:
-                i += 1
+            i += 1
 
     def generate_maze(
         self, R: int = 0, G: int = 150, B: int = 225,
