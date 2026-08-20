@@ -152,7 +152,7 @@ class Maze:
         return (whole_maze + RESET)
 
 
-class Maze_Generator:
+class MazeGenerator:
     def __init__(self, maze: Maze, perfect: bool = True) -> None:
         self.maze_object = maze
         self.stack: list[tuple[int, int]] = []
@@ -459,7 +459,7 @@ def main() -> None:
         try:
             print("\033[?25l", end="")
             maze = Maze(config.HEIGHT, config.WIDTH, config.ENTRY, config.EXIT)
-            maze_gen = Maze_Generator(maze, config.PERFECT)
+            maze_gen = MazeGenerator(maze, config.PERFECT)
             maze_gen.generate_maze(*colours[i], config.DELAY, disp_gen)
             maze_sol = Maze_Solver(maze)
             maze_sol.solver()
