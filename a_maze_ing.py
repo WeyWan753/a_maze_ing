@@ -1,9 +1,9 @@
 import random
 import time
 import os
+import sys
 
-
-DIRECTIONS = {
+DIRECTIONS: dict[str, dict[str, str | int]] = {
     "N": {"dr": -1, "dc": 0, "opposite": "S", "bit": 0},
     "E": {"dr": 0, "dc": 1, "opposite": "W", "bit": 1},
     "S": {"dr": 1, "dc": 0, "opposite": "N", "bit": 2},
@@ -12,35 +12,39 @@ DIRECTIONS = {
 
 
 class Maze:
-    def __init__(self, height: int, width: int, start: tuple[int, int], end: tuple[int, int]) -> None:
+    def __init__(
+            self, height: int, width: int, start: tuple[int, int],
+            end: tuple[int, int]
+            ) -> None:
         self.height = height
         self.width = width
         self.start = start
         self.end = end
-        self._42 = []
+        self._42 = set()
         if self.height >= 6 and self.width >= 9:
             (r, c) = (self.height//2, self.width//2)
             self._42 = {(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
-                        (r, c - 1), (r + 1, c - 1), (r + 2, c - 1), 
+                        (r, c - 1), (r + 1, c - 1), (r + 2, c - 1),
                         (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
                         (r - 1, c + 3), (r, c + 3), (r, c + 2), (r, c + 1),
-                        (r + 1, c + 1), (r + 2, c + 1), (r + 2, c + 2), (r + 2, c + 3)}
+                        (r + 1, c + 1), (r + 2, c + 1), (r + 2, c + 2),
+                        (r + 2, c + 3)}
         self.maze = [
             [
                 {"N": True, "E": True, "S": True, "W": True}
                 for col in range(width)
-            ]   
+            ]
             for row in range(height)
         ]
 
 
     def cell_to_int(self, r: int, c: int) -> int:
-        return sum([1 << DIRECTIONS[direction]["bit"] for direction in DIRECTIONS if self.maze[r][c][direction]])
+        return sum(1 << int(DIRECTIONS[direction]["bit"]) for direction in DIRECTIONS if self.maze[r][c][direction])
 
     def maze_to_hex(self) -> str:
         return "\n".join(["".join(["0123456789abcdef"[self.cell_to_int(r, c)] for c in range(self.width)]) for r in range(self.height)])
     
-    def render_maze(self, stack, R=0, G=150,B=225) -> str:
+    def render_maze(self, stack: list[tuple[int, int]], R: int = 0, G: int = 150,B: int = 225) -> str:
 
         WALL      = f"\033[38;2;{R};{G};{B}m"   
         GREEN     = "\033[38;2;0;255;0m"        
@@ -120,14 +124,15 @@ class Maze:
             whole_maze += row_str + "\n"
         return (whole_maze + RESET)
 
+
 class Maze_Generator:
-    def __init__(self, maze: Maze, perfect = True) -> None:
+    def __init__(self, maze: Maze, perfect: bool = True) -> None:
         self.maze_object = maze
-        self.stack = []
+        self.stack: list[tuple[int, int]] = []
         self.visited = set(maze._42)
         self.perfect = perfect
 
-    def large_open_region(self, r, c, direction) -> bool:
+    def large_open_region(self, r: int, c: int, direction: str) -> bool:
         maze = self.maze_object
         if not(0 < c < maze.width - 1 and 0 < r < maze.height - 1):
             return False
@@ -139,7 +144,7 @@ class Maze_Generator:
         top_right = maze.maze[r - 1][c + 1]
         top = maze.maze[r - 1][c]
         top_left = maze.maze[r - 1][c - 1]
-        return (maze.cell_to_int(r, c) == (1 << DIRECTIONS[direction]["bit"])
+        return (maze.cell_to_int(r, c) == (1 << int(DIRECTIONS[direction]["bit"]))
             and not any(left[d] for d in "NES")
             and not any(bottom_left[d] for d in "NE")
             and not any(bottom[d] for d in "WNE")
@@ -151,29 +156,26 @@ class Maze_Generator:
     
     def valid_wall_removal(self, r: int, c: int, direction: str) -> bool:
         maze = self.maze_object
-        if (not 0 <= r + DIRECTIONS[direction]["dr"] < maze.height
-            or not 0 <= c + DIRECTIONS[direction]["dc"] < maze.width):
+        if (not 0 <= r + int(DIRECTIONS[direction]["dr"]) < maze.height
+            or not 0 <= c + int(DIRECTIONS[direction]["dc"]) < maze.width):
             return False
         if not maze.maze[r][c][direction]:
             return False
-        if (r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]) in maze._42:
+        if (r + int(DIRECTIONS[direction]["dr"]), c + int(DIRECTIONS[direction]["dc"])) in maze._42:
             return False
         if self.large_open_region(r, c, direction):
             return False
         if self.large_open_region(
-                r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"],
-                DIRECTIONS[direction]["opposite"]):
+                r + int(DIRECTIONS[direction]["dr"]), c + int(DIRECTIONS[direction]["dc"]),
+                str(DIRECTIONS[direction]["opposite"])):
             return False
-        
-
         return True
 
 
-
-    def make_imperfect(self, R=0, G=150,B=225, delay=0.01, display_generation=False) -> None:
+    def make_imperfect(self, R: int = 0, G: int = 150,B: int = 225, delay: float = 0.01, display_generation: bool = False) -> None:
         maze = self.maze_object
 
-        def is_dead_end(r, c) -> bool:
+        def is_dead_end(r: int, c: int) -> bool:
             return (maze.cell_to_int(r, c) != (1 << 4) - 1 and (maze.cell_to_int(r, c) | (maze.cell_to_int(r, c) + 1)) == (1 << 4) - 1)
 
         dead_ends = [(r, c) for r in range(maze.height) for c in range(maze.width) if is_dead_end(r, c)] 
@@ -185,23 +187,23 @@ class Maze_Generator:
                 print(frame)
                 time.sleep(delay)
             r, c = dead_ends[i]
-            neighbour_dir = []
+            neighbour_dirs = []
             for direction in DIRECTIONS:
                 if self.valid_wall_removal(r, c, direction):
-                    neighbour_dir.append(direction)
+                    neighbour_dirs.append(direction)
 
-            if neighbour_dir:
-                neighbour_dir = random.choice(neighbour_dir)
-                opposite = DIRECTIONS[neighbour_dir]["opposite"]
+            if neighbour_dirs:
+                neighbour_dir = random.choice(neighbour_dirs)
+                opposite = str(DIRECTIONS[neighbour_dir]["opposite"])
                 maze.maze[r][c][neighbour_dir] = False
-                maze.maze[r + DIRECTIONS[neighbour_dir]["dr"]][c + DIRECTIONS[neighbour_dir]["dc"]][opposite] = False
+                maze.maze[r + int(DIRECTIONS[neighbour_dir]["dr"])][c + int(DIRECTIONS[neighbour_dir]["dc"])][opposite] = False
                 dead_ends = [(r, c) for (r, c) in dead_ends if is_dead_end(r, c)] 
                 i = 0
             else:
                 i += 1
 
 
-    def generate_maze(self, R=0, G=150,B=225, delay=0.1, display_generation=False) -> None:
+    def generate_maze(self, R: int = 0, G: int = 150,B: int = 225, delay: float = 0.1, display_generation: bool = False) -> None:
         maze = self.maze_object
         start = maze.start
         end = maze.end
@@ -216,21 +218,21 @@ class Maze_Generator:
             r, c = self.stack[-1]
             neighbour = []
             for direction in DIRECTIONS:
-                if (0 <= r + DIRECTIONS[direction]["dr"] < maze.height
-                    and 0 <= c + DIRECTIONS[direction]["dc"] < maze.width
-                    and (r + DIRECTIONS[direction]["dr"],
-                         c + DIRECTIONS[direction]["dc"]) not in self.visited):
+                if (0 <= r + int(DIRECTIONS[direction]["dr"]) < maze.height
+                    and 0 <= c + int(DIRECTIONS[direction]["dc"]) < maze.width
+                    and (r + int(DIRECTIONS[direction]["dr"]),
+                         c + int(DIRECTIONS[direction]["dc"])) not in self.visited):
                     neighbour.append(
-                            ((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]), direction)
+                            ((r + int(DIRECTIONS[direction]["dr"]), c + int(DIRECTIONS[direction]["dc"])), direction)
                     )
 
             if neighbour:
                 next_point, neighbour_dir = random.choice(neighbour)
                 self.stack.append(next_point)
                 self.visited.add(next_point)
-                opposite = DIRECTIONS[neighbour_dir]["opposite"]
+                opposite = str(DIRECTIONS[neighbour_dir]["opposite"])
                 maze.maze[r][c][neighbour_dir] = False
-                maze.maze[r + DIRECTIONS[neighbour_dir]["dr"]][c + DIRECTIONS[neighbour_dir]["dc"]][opposite] = False
+                maze.maze[r + int(DIRECTIONS[neighbour_dir]["dr"])][c + int(DIRECTIONS[neighbour_dir]["dc"])][opposite] = False
             else:
                 self.stack.pop(-1)
 
@@ -242,12 +244,12 @@ class Maze_Generator:
 class Maze_Solver:
     def __init__(self, maze: Maze) -> None:
         self.maze_object = maze
-        self.queue = []
-        self.visited = set()
-        self.parent = {}
+        self.queue: list[tuple[int, int]] = []
+        self.visited: set[tuple[int, int]] = set()
+        self.parent: dict[tuple[int, int], tuple[tuple[int, int], str] | None] = {}
         self.queue_index = 0
         self.found_solution = False
-        self.solution_path = []
+        self.solution_path: list[tuple[tuple[int, int], str | None]] = []
 
 
     def solver(self) -> None:
@@ -261,38 +263,101 @@ class Maze_Solver:
                 break
             for direction in DIRECTIONS:
                 if (not self.maze_object.maze[r][c][direction] and
-                    (r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"])
+                    (r + int(DIRECTIONS[direction]["dr"]), c + int(DIRECTIONS[direction]["dc"]))
                     not in self.visited):
-                    self.queue.append((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]))
-                    self.parent[(r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"])] = ((r, c), direction)
-                    self.visited.add((r + DIRECTIONS[direction]["dr"], c + DIRECTIONS[direction]["dc"]))
+                    self.queue.append((r + int(DIRECTIONS[direction]["dr"]), c + int(DIRECTIONS[direction]["dc"])))
+                    self.parent[(r + int(DIRECTIONS[direction]["dr"]), c + int(DIRECTIONS[direction]["dc"]))] = ((r, c), direction)
+                    self.visited.add((r + int(DIRECTIONS[direction]["dr"]), c + int(DIRECTIONS[direction]["dc"])))
             self.queue_index += 1
             
         if self.found_solution:
-            curr = (self.maze_object.end, None)
+            curr: tuple[tuple[int, int], str | None] | None = (self.maze_object.end, None)
             while curr is not None:
                 self.solution_path.append(curr)
                 curr = self.parent[curr[0]]
             self.solution_path.reverse()
 
 
-def load_config(filename="config.txt"):
-    config = {}
+class Config:
+    def __init__(self, filename: str) -> None:
+        self.required = ["WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE", "OUTPUT_FILE", "PERFECT", "DELAY", "SEED"]
+        self.config = self.load_config(filename)
+        self.parse_config()
+        self.validate_config_format()
 
-    with open(filename, "r") as file:
-        for line in file:
-            line = line.strip()
+    def load_config(self, filename: str = "config.txt") -> dict[str, str]:
+        config = {}
 
-            if not line or line.startswith("#"):
-                continue
+        with open(filename, "r") as file:
+            for line in file:
+                line = line.strip()
 
-            key, value = line.split("=", 1)
-            config[key] = value
+                if not line or line.startswith("#"):
+                    continue
 
-    return config
+                key, value = line.split("=", 1)
+                config[key] = value
+
+        return config
+
+    def parse_config(self) -> None:
+        for key in self.required:
+            value = self.config.get(key)
+            if value is None:
+                raise Exception(f"Missing key: {key}")
+
+
+    def validate_config_format(self) -> None:
+        self.WIDTH = int(self.config["WIDTH"])
+        self.HEIGHT = int(self.config["HEIGHT"])
+        r, c = tuple(int(x) for x in self.config["ENTRY"].split(",", 1))
+        self.ENTRY = (r, c)
+        r, c = tuple(int(x) for x in self.config["EXIT"].split(",", 1))
+        self.EXIT = (r, c)
+        self.OUTPUT_FILE = self.config["OUTPUT_FILE"].strip("\"'")
+        self.PERFECT = True if self.config["PERFECT"].strip("\"'").lower() == "true" else False
+        self.DELAY = float(self.config["DELAY"])
+        self.SEED = int(self.config["SEED"])
+        _42 = set()
+        if self.HEIGHT >= 6 and self.WIDTH >= 9:
+            (r, c) = (self.HEIGHT//2, self.WIDTH//2)
+            _42 = {(r - 2, c - 3), (r - 1, c - 3), (r, c - 3), (r, c - 2),
+                        (r, c - 1), (r + 1, c - 1), (r + 2, c - 1), 
+                        (r - 2, c + 1), (r - 2, c + 2), (r - 2, c + 3),
+                        (r - 1, c + 3), (r, c + 3), (r, c + 2), (r, c + 1),
+                        (r + 1, c + 1), (r + 2, c + 1), (r + 2, c + 2), (r + 2, c + 3)}
+        if self.ENTRY in _42:
+            raise Exception("Entry Cant be in 42 pattern")
+        if self.EXIT in _42:
+            raise Exception("Exit Cant be in 42 pattern")
+        if self.ENTRY == self.EXIT:
+            raise Exception("Entry and Exit cant be the same")
+        if not (0 <= self.ENTRY[0] < self.HEIGHT and 0 <= self.ENTRY[1] < self.WIDTH):
+            raise Exception("Entry is out of bound")
+        if not (0 <= self.EXIT[0] < self.HEIGHT and 0 <= self.EXIT[1] < self.WIDTH):
+            raise Exception("Exit is out of bound")
+        if self.HEIGHT <= 0:
+            raise Exception("Height must be positive integer")
+        if self.WIDTH <= 0:
+            raise Exception("Width must be positive integer")
+        if (self.HEIGHT == 1 or self.WIDTH == 1) and self.PERFECT == False:
+            raise Exception("No non-perfect maze can be generated")
+
+    def save_output(self, maze_hex: str, solution_path: list[tuple[tuple[int, int], str | None]]) -> None:
+        with open(self.config["OUTPUT_FILE"], "w") as file:
+            file.write(
+                maze_hex + "\n\n" +
+                f"{self.config["ENTRY"][0]},{self.config["ENTRY"][1]}" +
+                "\n" + f"{self.config["EXIT"][0]},{self.config["EXIT"][1]}" + "\n" +
+                "".join([item[1] for item in solution_path if item[1] is not None]) + "\n"
+            )
 
 
 def main() -> None:
+
+    if len(sys.argv) != 2:
+        print("wrong format, usage: python3 a_maze_ing.py [config file name]")
+        return
 
     display_generation = False
     show_path = True
@@ -300,33 +365,7 @@ def main() -> None:
     colours = [(0, 150, 225), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)]
     
     try:
-        config = load_config("config.txt")   
-        WIDTH = int(config["WIDTH"])
-        HEIGHT = int(config["HEIGHT"])
-        ENTRY = tuple(int(x) for x in config["ENTRY"].split(","))
-        EXIT = tuple(int(x) for x in config["EXIT"].split(","))
-        OUTPUT_FILE = config["OUTPUT_FILE"].strip("\"'")
-        PERFECT = True if config["PERFECT"].strip("\"'").lower() == "true" else False
-        DELAY = float(config["DELAY"])
-        SEED = int(config["SEED"])
-        random.seed(SEED)
-        maze = Maze(HEIGHT, WIDTH, ENTRY, EXIT)
-        if ENTRY in maze._42:
-            raise Exception("Entry Cant be in 42 pattern")
-        if EXIT in maze._42:
-            raise Exception("Exit Cant be in 42 pattern")
-        if ENTRY == EXIT:
-            raise Exception("Entry and Exit cant be the same")
-        if not (0 <= ENTRY[0] < maze.height and 0 <= ENTRY[1] < maze.width):
-            raise Exception("Entry is out of bound")
-        if not (0 <= EXIT[0] < maze.height and 0 <= EXIT[1] < maze.width):
-            raise Exception("Exit is out of bound")
-        if HEIGHT <= 0:
-            raise Exception("Height must be positive integer")
-        if WIDTH <= 0:
-            raise Exception("Width must be positive integer")
-        if (HEIGHT == 1 or WIDTH == 1) and PERFECT == False:
-            raise Exception("No non-perfect maze can be generated")
+        config = Config(sys.argv[1])
     except Exception as e:
         print(e)
         return
@@ -334,9 +373,9 @@ def main() -> None:
     while True:
         try:
             print("\033[?25l", end="") #hide cursor
-            maze = Maze(HEIGHT, WIDTH, ENTRY, EXIT)
-            maze_gen = Maze_Generator(maze, perfect = PERFECT)
-            maze_gen.generate_maze(*colours[i], delay = DELAY, display_generation=display_generation)
+            maze = Maze(config.HEIGHT, config.WIDTH, config.ENTRY, config.EXIT)
+            maze_gen = Maze_Generator(maze, perfect = config.PERFECT)
+            maze_gen.generate_maze(*colours[i], delay = config.DELAY, display_generation=display_generation)
             maze_sol = Maze_Solver(maze)
             maze_sol.solver()
             while True:
@@ -350,11 +389,8 @@ def main() -> None:
                 print("3. Rotate the wall colours")
                 print(f"4. Toggle animation of generation of the maze (Status : {'On' if display_generation else 'Off'})")
                 print("5. Quit")
-
-                with open(OUTPUT_FILE, "w") as file:
-                    file.write(maze.maze_to_hex() + "\n\n" + f"{ENTRY[0]},{ENTRY[1]}" + "\n" + f"{EXIT[0]},{EXIT[1]}" + "\n" +
-                               "".join([item[1] for item in maze_sol.solution_path if item[1] is not None]) + "\n")
-
+            
+                config.save_output(maze.maze_to_hex(), maze_sol.solution_path)
                 choice = input("Choice? (1-5): ")
                 if choice == "1":
                     break
