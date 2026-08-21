@@ -28,6 +28,9 @@ class Config:
             value = self.config.get(key)
             if value is None:
                 raise Exception(f"Missing key: {key}")
+        perfect = self.config["PERFECT"].lower()
+        if not (perfect == "true" or perfect == "false"):
+            raise Exception("PERFECT must either be true or false only")
 
     def validate_config_format(self) -> None:
         self.WIDTH = int(self.config["WIDTH"])
