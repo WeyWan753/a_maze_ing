@@ -119,14 +119,16 @@ class Config:
         entry = tuple(int(x) for x in self.config["ENTRY"].split(","))
         if len(entry) != 2:
             raise Exception(
-                "Error: entry must be in coordinate of "
+                f"Error: {self.config["ENTRY"]} "
+                "entry must be in coordinate of "
                 "the the form: column,row")
         c, r = entry
         self.ENTRY = (r, c)
         _exit = tuple(int(x) for x in self.config["EXIT"].split(","))
         if len(_exit) != 2:
             raise Exception(
-                "Error: exit must be in coordinate of the the form: column,row"
+                f"Error: {self.config["EXIT"]} "
+                "exit must be in coordinate of the the form: column,row"
             )
         c, r = _exit
         self.EXIT = (r, c)
