@@ -1,4 +1,4 @@
-from src import Maze, MazeGenerator, MazeSolver, Config
+from mazegen import Maze, MazeGenerator, MazeSolver, Config
 import random
 import os
 import sys

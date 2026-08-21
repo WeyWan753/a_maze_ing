@@ -1,0 +1,64 @@
+改了文件名
+PEP257 note
+? 动画默认开
+
+-----config-------
+config output两次删了一个
+? DELAY、SEED 不应该是 mandatory。题目规定必须有的是 WIDTH / HEIGHT / ENTRY / EXIT / OUTPUT_FILE / PERFECT，其他配置可以是 optional。
+? perfect更合理的是只接受 true / false   [to]
+raise 不能生成42的
+? x=width, y=height(原始rc不对应)
+调整顺序先查正数再查别的
+2x2也不行
+r,c [to]
+
+--------maze-------
+？墙统一
+晕
+？是为了print(WALL, end="")
+
+--------gener-------
+？不保证大于2个loop，要加一个 loops_created 之类的计数/验证。[to]
+3×3 large open area [to]
+
+--------solver--------
+
+----------amazing-------
+？show path/换颜色/开关动画 要重新生成吗
+
+I think there may be one issue with the reusable-module requirement. Currently MazeGenerator takes an already-created Maze and perfect, while dimensions are passed to Maze, the seed is set globally in a_maze_ing.py, and the solution is only accessible through a separate MazeSolver. The subject says MazeGenerator should be the main entry point and the documentation should show how to pass custom dimensions and a seed, access the generated structure, and access at least one solution. Maybe we should expose these through MazeGenerator itself, while keeping Maze and MazeSolver internally.
+
+---------------------------------------
+```text
+python3 a_maze_ing.py config.txt
+        ↓
+1. a_maze_ing.py
+   程序入口：检查参数，读取配置，设置随机种子
+        ↓
+2. config.py
+   读取并验证 WIDTH / HEIGHT / ENTRY / EXIT / PERFECT / SEED 等配置
+        ↓
+3. maze.py
+   创建迷宫网格，初始化每个 cell 的四面墙，并生成 42 图案位置
+        ↓
+4. generator.py
+   使用 DFS 随机生成迷宫；PERFECT=False 时额外拆墙，减少死路并增加路线
+        ↓
+5. solver.py
+   使用 BFS 从入口寻找出口，并得到最短路径
+        ↓
+6. maze.py → render_maze()
+   在终端显示墙、42、入口、出口和最短路径
+        ↓
+7. config.py → save_output()
+   将迷宫转换为十六进制格式，并写入 maze.txt
+        ↓
+8. a_maze_ing.py
+   用户交互：重新生成 / 显示隐藏路径 / 修改墙颜色 / 开关生成动画 / 退出
+```
+
+`directions.py`：保存 N / E / S / W 的移动方向、反方向和对应 bit，供 `generator.py` 和 `solver.py` 共用。
+-----------------------------------------
+打包：
+1.setup.py + requirment.txt
+2.pyproject.toml
