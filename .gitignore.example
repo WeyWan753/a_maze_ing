@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+
+# Type checker / test cache
+.mypy_cache/
+.pytest_cache/
+
+# Build output
+build/
+dist/
+*.egg-info/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
