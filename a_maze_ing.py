@@ -40,6 +40,10 @@ def main() -> None:
                 os.system("cls" if os.name == "nt" else "clear")
                 print(frame)
                 print("=== A-Maze_ing ===")
+                if not (config.HEIGHT >= 6 and config.WIDTH >= 9):
+                    print(
+                        "Warning : the dimension can not accomodate 42 pattern"
+                        )
                 print("1. Re-generate a new maze")
                 print("2. Show / Hide the shortest path")
                 print("3. Rotate the wall colours")

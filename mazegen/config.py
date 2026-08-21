@@ -137,8 +137,6 @@ class Config:
                     (r - 1, c + 3), (r, c + 3), (r, c + 2), (r, c + 1),
                     (r + 1, c + 1), (r + 2, c + 1),
                     (r + 2, c + 2), (r + 2, c + 3)}
-        else:
-            print("Error: maze is too small to display the 42 pattern")
 
         if self.ENTRY in _42:
             raise Exception("Entry Cant be in 42 pattern")
