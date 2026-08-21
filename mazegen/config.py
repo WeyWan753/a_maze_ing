@@ -71,8 +71,11 @@ class Config:
 
                 if not line or line.startswith("#"):
                     continue
-
-                key, value = line.split("=", 1)
+                split = line.split("=", 1)
+                if len(split) != 2:
+                    raise Exception(
+                        f"Error: {split}, follow this format: 'KEY=VALUE'")
+                key, value = split
                 config[key] = value
 
         return config
