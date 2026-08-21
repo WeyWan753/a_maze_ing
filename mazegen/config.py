@@ -116,9 +116,19 @@ class Config:
 
         self.WIDTH = int(self.config["WIDTH"])
         self.HEIGHT = int(self.config["HEIGHT"])
-        c, r = tuple(int(x) for x in self.config["ENTRY"].split(",", 1))
+        entry = tuple(int(x) for x in self.config["ENTRY"].split(",", 1))
+        if len(entry) != 2:
+            raise Exception(
+                "Error: entry must be in coordinate of "
+                "the the form: column,row")
+        c, r = entry
         self.ENTRY = (r, c)
-        c, r = tuple(int(x) for x in self.config["EXIT"].split(",", 1))
+        _exit = tuple(int(x) for x in self.config["EXIT"].split(",", 1))
+        if len(_exit) != 2:
+            raise Exception(
+                "Error: exit must be in coordinate of the the form: column,row"
+            )
+        c, r = _exit
         self.EXIT = (r, c)
         self.OUTPUT_FILE = self.config["OUTPUT_FILE"].strip("\"'")
         self.PERFECT = self.config["PERFECT"].strip("\"'").lower() == "true"
