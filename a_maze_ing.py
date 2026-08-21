@@ -46,7 +46,6 @@ def main() -> None:
                 print(f"4. Toggle animation of generation of the "
                       f"maze (Status : {'On' if disp_gen else 'Off'})")
                 print("5. Quit")
-
                 config.save_output(maze.maze_to_hex(), maze_sol.solution_path)
                 choice = input("Choice? (1-5): ")
                 if choice == "1":

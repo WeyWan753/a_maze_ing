@@ -12,6 +12,18 @@ class MazeGenerator:
         self.visited = set(maze._42)
         self.perfect = perfect
 
+    def independent_path(self) -> int:
+        maze = self.maze_object
+        V = maze.height * maze.width - len(maze._42)
+        E = sum(
+            1 if not maze.maze[r][c][d] else 0
+            for r in range(maze.height)
+            for c in range(maze.width)
+            for d in "NESW")//2
+        C = 1
+        L = E - V + C
+        return L
+
     def large_open_region(self, r: int, c: int, direction: str) -> bool:
         maze = self.maze_object
         if not (0 < c < maze.width - 1 and 0 < r < maze.height - 1):
@@ -106,6 +118,34 @@ class MazeGenerator:
                         opposite
                 ] = False
             i += 1
+        L = self.independent_path()
+        for (r, c) in (
+                (row, col) for row in range(maze.height)
+                for col in range(maze.width)):
+            if display_generation:
+                frame = maze.render_maze([], R, G, B)
+                os.system("cls" if os.name == "nt" else "clear")
+                print(frame)
+                time.sleep(delay)
+            if L >= 2:
+                break
+            neighbour_dirs = []
+            for direction in DIRECTIONS:
+                if self.valid_wall_removal(r, c, direction):
+                    neighbour_dirs.append(direction)
+
+            if neighbour_dirs:
+                neighbour_dir = random.choice(neighbour_dirs)
+                opposite = str(DIRECTIONS[neighbour_dir]["opposite"])
+                maze.maze[r][c][neighbour_dir] = False
+                maze.maze[
+                        r + int(DIRECTIONS[neighbour_dir]["dr"])
+                ][
+                        c + int(DIRECTIONS[neighbour_dir]["dc"])
+                ][
+                        opposite
+                ] = False
+            L = self.independent_path()
 
     def generate_maze(
         self, R: int = 0, G: int = 150, B: int = 225,
