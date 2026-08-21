@@ -74,7 +74,7 @@ class Config:
                 split = line.split("=")
                 if len(split) != 2:
                     raise Exception(
-                        f"Error: {split}, follow this format: 'KEY=VALUE'")
+                        f"Error: {line}, follow this format: 'KEY=VALUE'")
                 key, value = split
                 config[key] = value
 

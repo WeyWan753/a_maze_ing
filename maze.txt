@@ -6,5 +6,5 @@ afffafffa
 c46fefffe
 
 0,0
-8,5
-EESENEEEEESSSSS
+2,5
+SSSSEES
