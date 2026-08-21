@@ -71,7 +71,7 @@ class Config:
 
                 if not line or line.startswith("#"):
                     continue
-                split = line.split("=", 1)
+                split = line.split("=")
                 if len(split) != 2:
                     raise Exception(
                         f"Error: {split}, follow this format: 'KEY=VALUE'")
@@ -116,14 +116,14 @@ class Config:
 
         self.WIDTH = int(self.config["WIDTH"])
         self.HEIGHT = int(self.config["HEIGHT"])
-        entry = tuple(int(x) for x in self.config["ENTRY"].split(",", 1))
+        entry = tuple(int(x) for x in self.config["ENTRY"].split(","))
         if len(entry) != 2:
             raise Exception(
                 "Error: entry must be in coordinate of "
                 "the the form: column,row")
         c, r = entry
         self.ENTRY = (r, c)
-        _exit = tuple(int(x) for x in self.config["EXIT"].split(",", 1))
+        _exit = tuple(int(x) for x in self.config["EXIT"].split(","))
         if len(_exit) != 2:
             raise Exception(
                 "Error: exit must be in coordinate of the the form: column,row"
