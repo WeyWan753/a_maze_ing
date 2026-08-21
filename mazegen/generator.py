@@ -54,6 +54,10 @@ class MazeGenerator:
                 c + int(DIRECTIONS[direction]["dc"]),
                 str(DIRECTIONS[direction]["opposite"])):
             return False
+        if ((r, c) in maze._42 or
+            (r + int(DIRECTIONS[direction]["dr"]),
+                c + int(DIRECTIONS[direction]["dc"])) in maze._42):
+            return False
         return True
 
     def make_imperfect(
