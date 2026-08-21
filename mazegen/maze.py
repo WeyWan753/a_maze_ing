@@ -1,8 +1,34 @@
+"""Core maze data structure: grid, walls, encoding, and rendering.
+
+Defines the Maze class, which stores the wall state of every cell in
+a grid as well as entry/exit coordinates and the mandatory "42"
+pattern. Provides methods to encode the maze as hexadecimal (for the
+output file format) and to render it as an ANSI-coloured ASCII string
+for terminal display.
+"""
+
+
 class Maze:
+
+    """Represents a grid-based maze and its wall state.
+
+    Stores the maze dimensions, entry/exit points, the "42" pattern
+    cells, and a per-cell dictionary of wall states (True = closed,
+    False = open) for each cardinal direction.
+    """
+
     def __init__(
             self, height: int, width: int, start: tuple[int, int],
             end: tuple[int, int]
             ) -> None:
+        """Initialize an empty maze grid with all walls closed.
+
+        Args:
+            height: Number of rows in the maze.
+            width: Number of columns in the maze.
+            start: (row, col) coordinates of the entry cell.
+            end: (row, col) coordinates of the exit cell.
+        """
         self.height = height
         self.width = width
         self.start = start
@@ -25,6 +51,16 @@ class Maze:
         ]
 
     def cell_to_int(self, r: int, c: int) -> int:
+        """Encode a cell's wall configuration as an integer (0-15).
+
+        Args:
+            r: Row index of the cell.
+            c: Column index of the cell.
+
+        Returns:
+            Integer where each bit represents a closed wall
+            (N=1, E=2, S=4, W=8), following the direction bit mapping.
+        """
         return (
             self.maze[r][c]["N"] * 1
             + self.maze[r][c]["E"] * 2
@@ -33,6 +69,12 @@ class Maze:
         )
 
     def maze_to_hex(self) -> str:
+        """Encode the entire maze as a hexadecimal grid string.
+
+        Returns:
+            A string with one row per line, each cell represented by
+            a single hexadecimal digit (0-f) describing its walls.
+        """
         return (
             "\n".join(
                 [
@@ -51,6 +93,21 @@ class Maze:
         self, stack: list[tuple[int, int]], R: int = 0, G: int = 150,
         B: int = 225
     ) -> str:
+        """Render an ASCII/ANSI-coloured text representation of the maze.
+
+        Args:
+            stack: Ordered list of cells to highlight as a path
+                (e.g. the solution path or the generation stack).
+                Pass an empty list to render with no path highlighted.
+            R: Red component of the wall colour (0-255).
+            G: Green component of the wall colour (0-255).
+            B: Blue component of the wall colour (0-255).
+
+        Returns:
+            A multi-line string containing the ANSI-coloured maze,
+            including the start, end, walls, the "42" pattern, and
+            the highlighted path if provided.
+        """
 
         WALL = f"\033[38;2;{R};{G};{B}m"
         GREEN = "\033[38;2;0;255;0m"

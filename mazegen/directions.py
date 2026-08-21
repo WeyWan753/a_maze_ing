@@ -1,3 +1,10 @@
+"""Cardinal direction metadata used throughout the maze package.
+
+Maps each direction ("N", "E", "S", "W") to its row/column delta, its
+opposite direction, and the bit position used for hexadecimal wall
+encoding.
+"""
+
 DIRECTIONS: dict[str, dict[str, str | int]] = {
     "N": {"dr": -1, "dc": 0, "opposite": "S", "bit": 0},
     "E": {"dr": 0, "dc": 1, "opposite": "W", "bit": 1},

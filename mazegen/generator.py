@@ -1,3 +1,12 @@
+"""Randomized maze generation via DFS backtracking.
+
+Carves maze walls in place on a Maze instance using an iterative
+depth-first-search backtracker. Supports both perfect mazes (single
+path, no loops) and non-perfect, Pac-Man-style boards (looped, with
+open corners and centre) while respecting the "42" pattern and the
+no-large-open-area constraint.
+"""
+
 from .maze import Maze
 from .directions import DIRECTIONS
 import random
@@ -6,13 +15,33 @@ import os
 
 
 class MazeGenerator:
+    """Generates a maze's wall layout using a randomized DFS backtracker.
+
+    Carves passages into a Maze object either as a perfect maze
+    (single unique path, no loops) or, if not perfect, converts it
+    afterwards into a Pac-Man-style board with loops and open corners.
+    """
     def __init__(self, maze: Maze, perfect: bool = True) -> None:
+        """Initialize the generator for a given maze.
+
+        Args:
+            maze: The Maze instance whose walls will be carved.
+            perfect: If True, generate a perfect maze (no loops).
+                If False, generate a maze and then loosen it into a
+                Pac-Man-style board with multiple routes.
+        """
         self.maze_object = maze
         self.stack: list[tuple[int, int]] = []
         self.visited = set(maze._42)
         self.perfect = perfect
 
     def independent_path(self) -> int:
+        """Compute the maze's cyclomatic number (number of independent loops).
+
+        Returns:
+            The number of independent cycles in the maze graph,
+            computed as edges - vertices + connected_components.
+        """
         maze = self.maze_object
         V = maze.height * maze.width - len(maze._42)
         E = sum(
@@ -25,6 +54,18 @@ class MazeGenerator:
         return L
 
     def large_open_region(self, r: int, c: int, direction: str | None) -> bool:
+        """Check whether opening a wall would create an oversized open area.
+
+        Args:
+            r: Row index of the cell being evaluated.
+            c: Column index of the cell being evaluated.
+            direction: Direction of the wall to test opening, or None
+                to test the cell's current open state directly.
+
+        Returns:
+            True if opening this wall would create a corridor wider
+            than the allowed 2-cell maximum, False otherwise.
+        """
         maze = self.maze_object
 
         if r == 0 and maze.height > 2:
@@ -99,6 +140,18 @@ class MazeGenerator:
             and not any(top_left[d] for d in "ES"))
 
     def valid_wall_removal(self, r: int, c: int, direction: str) -> bool:
+        """Check whether a wall can be safely removed.
+
+        Args:
+            r: Row index of the cell.
+            c: Column index of the cell.
+            direction: Direction of the wall to remove.
+
+        Returns:
+            True if removing this wall stays in bounds, doesn't touch
+            the "42" pattern, and doesn't create an oversized open
+            region; False otherwise.
+        """
         maze = self.maze_object
         if (
             not 0 <= r + int(DIRECTIONS[direction]["dr"]) < maze.height
@@ -124,6 +177,21 @@ class MazeGenerator:
         self, R: int = 0, G: int = 150, B: int = 225,
         delay: float = 0.01, display_generation: bool = False
     ) -> None:
+        """Convert a perfect maze into a Pac-Man-style playable board.
+
+        Removes walls at dead ends and, if needed, additional walls
+        to guarantee at least two independent routes (loops) while
+        opening the four corners and the centre cell.
+
+        Args:
+            R: Red component of the wall colour, used only for
+                optional live-rendering during the process.
+            G: Green component of the wall colour.
+            B: Blue component of the wall colour.
+            delay: Seconds to wait between rendered animation frames.
+            display_generation: If True, print each intermediate step
+                to the terminal.
+        """
         maze = self.maze_object
 
         def is_dead_end(r: int, c: int) -> bool:
@@ -202,6 +270,26 @@ class MazeGenerator:
         self, R: int = 0, G: int = 150, B: int = 225,
         delay: float = 0.1, display_generation: bool = False
     ) -> None:
+        """Carve the maze's walls in place using randomized DFS backtracking.
+
+        Starts from maze.start and performs an iterative depth-first
+        search, removing walls between the current cell and a
+        randomly chosen unvisited neighbour, backtracking when no
+        unvisited neighbours remain. If self.perfect is False,
+        make_imperfect is called afterwards to add loops.
+
+        Args:
+            R: Red component of the wall colour, used only when
+                display_generation is True.
+            G: Green component of the wall colour, used only when
+                display_generation is True.
+            B: Blue component of the wall colour, used only when
+                display_generation is True.
+            delay: Seconds to pause between animation frames when
+                display_generation is True.
+            display_generation: If True, print each intermediate step
+                to the terminal as an animation.
+        """
         maze = self.maze_object
         start = maze.start
         self.stack.append(start)
