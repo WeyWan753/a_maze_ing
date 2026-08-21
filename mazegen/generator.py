@@ -44,9 +44,6 @@ class MazeGenerator:
             return False
         if not maze.maze[r][c][direction]:
             return False
-        if ((r + int(DIRECTIONS[direction]["dr"]),
-             c + int(DIRECTIONS[direction]["dc"])) in maze._42):
-            return False
         if self.large_open_region(r, c, direction):
             return False
         if self.large_open_region(
