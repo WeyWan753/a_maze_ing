@@ -145,7 +145,7 @@ class MazeGenerator:
                 ][
                         opposite
                 ] = False
-            L = self.independent_path()
+                L = self.independent_path()
 
     def generate_maze(
         self, R: int = 0, G: int = 150, B: int = 225,
