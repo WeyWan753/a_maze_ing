@@ -71,45 +71,65 @@ class MazeGenerator:
         if r == 0 and maze.height > 2:
             if direction is None:
                 return False
+            dr = int(DIRECTIONS[direction]["dr"])
+            dc = int(DIRECTIONS[direction]["dc"])
+            opp = str(DIRECTIONS[direction]["opposite"])
             maze.maze[r][c][direction] = False
+            maze.maze[r + dr][c + dc][opp] = False
             result = any(
                 self.large_open_region(r + 1, c - 1 + i, None)
                 for i in range(3)
             )
             maze.maze[r][c][direction] = True
+            maze.maze[r + dr][c + dc][opp] = True
             return result
 
         if r == maze.height - 1 and maze.height > 2:
             if direction is None:
                 return False
+            dr = int(DIRECTIONS[direction]["dr"])
+            dc = int(DIRECTIONS[direction]["dc"])
+            opp = str(DIRECTIONS[direction]["opposite"])
             maze.maze[r][c][direction] = False
+            maze.maze[r + dr][c + dc][opp] = False
             result = any(
                 self.large_open_region(r - 1, c - 1 + i, None)
                 for i in range(3)
             )
             maze.maze[r][c][direction] = True
+            maze.maze[r + dr][c + dc][opp] = True
             return result
 
         if c == 0 and maze.width > 2:
             if direction is None:
                 return False
+            dr = int(DIRECTIONS[direction]["dr"])
+            dc = int(DIRECTIONS[direction]["dc"])
+            opp = str(DIRECTIONS[direction]["opposite"])
             maze.maze[r][c][direction] = False
+            maze.maze[r + dr][c + dc][opp] = False
             result = any(
                 self.large_open_region(r - 1 + i, c + 1, None)
                 for i in range(3)
             )
             maze.maze[r][c][direction] = True
+            maze.maze[r + dr][c + dc][opp] = True
             return result
 
         if c == maze.width - 1 and maze.width > 2:
             if direction is None:
                 return False
+            dr = int(DIRECTIONS[direction]["dr"])
+            dc = int(DIRECTIONS[direction]["dc"])
+            opp = str(DIRECTIONS[direction]["opposite"])
             maze.maze[r][c][direction] = False
+            maze.maze[r + dr][c + dc][opp] = False
             result = any(
                 self.large_open_region(r - 1 + i, c - 1, None)
                 for i in range(3)
             )
             maze.maze[r][c][direction] = True
+            maze.maze[r + dr][c + dc][opp] = True
             return result
 
         if not (0 < c < maze.width - 1 and 0 < r < maze.height - 1):
@@ -122,22 +142,40 @@ class MazeGenerator:
         top_right = maze.maze[r - 1][c + 1]
         top = maze.maze[r - 1][c]
         top_left = maze.maze[r - 1][c - 1]
-        if direction is None:
+        if direction is not None:
+            dr = int(DIRECTIONS[direction]["dr"])
+            dc = int(DIRECTIONS[direction]["dc"])
+            opp = str(DIRECTIONS[direction]["opposite"])
+            maze.maze[r][c][direction] = False
+            maze.maze[r + dr][c + dc][opp] = False
             is_center_open = maze.cell_to_int(r, c) == 0
+            result = (
+                is_center_open
+                and not any(left[d] for d in "NES")
+                and not any(bottom_left[d] for d in "NE")
+                and not any(bottom[d] for d in "WNE")
+                and not any(bottom_right[d] for d in "WN")
+                and not any(right[d] for d in "SWN")
+                and not any(top_right[d] for d in "SW")
+                and not any(top[d] for d in "ESW")
+                and not any(top_left[d] for d in "ES"))
+            maze.maze[r][c][direction] = True
+            maze.maze[r + dr][c + dc][opp] = True
+
         else:
-            is_center_open = maze.cell_to_int(r, c) == (
-                1 << int(DIRECTIONS[direction]["bit"])
-            )
-        return (
-            is_center_open
-            and not any(left[d] for d in "NES")
-            and not any(bottom_left[d] for d in "NE")
-            and not any(bottom[d] for d in "WNE")
-            and not any(bottom_right[d] for d in "WN")
-            and not any(right[d] for d in "SWN")
-            and not any(top_right[d] for d in "SW")
-            and not any(top[d] for d in "ESW")
-            and not any(top_left[d] for d in "ES"))
+            is_center_open = maze.cell_to_int(r, c) == 0
+            result = (
+                is_center_open
+                and not any(left[d] for d in "NES")
+                and not any(bottom_left[d] for d in "NE")
+                and not any(bottom[d] for d in "WNE")
+                and not any(bottom_right[d] for d in "WN")
+                and not any(right[d] for d in "SWN")
+                and not any(top_right[d] for d in "SW")
+                and not any(top[d] for d in "ESW")
+                and not any(top_left[d] for d in "ES"))
+
+        return result
 
     def valid_wall_removal(self, r: int, c: int, direction: str) -> bool:
         """Check whether a wall can be safely removed.
@@ -160,6 +198,10 @@ class MazeGenerator:
             return False
         if not maze.maze[r][c][direction]:
             return False
+        if ((r, c) in maze._42 or
+            (r + int(DIRECTIONS[direction]["dr"]),
+                c + int(DIRECTIONS[direction]["dc"])) in maze._42):
+            return False
         if self.large_open_region(r, c, direction):
             return False
         if self.large_open_region(
@@ -167,10 +209,7 @@ class MazeGenerator:
                 c + int(DIRECTIONS[direction]["dc"]),
                 str(DIRECTIONS[direction]["opposite"])):
             return False
-        if ((r, c) in maze._42 or
-            (r + int(DIRECTIONS[direction]["dr"]),
-                c + int(DIRECTIONS[direction]["dc"])) in maze._42):
-            return False
+
         return True
 
     def make_imperfect(
